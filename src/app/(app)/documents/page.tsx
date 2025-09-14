@@ -2,6 +2,7 @@
 "use client";
 
 import { MoreHorizontal, PlusCircle, X } from "lucide-react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -88,9 +89,11 @@ export default function DocumentsPage() {
             {t("documentsPage.description")}
           </p>
         </div>
-        <Button>
-          <PlusCircle />
-          {t("documentsPage.addDocument")}
+        <Button asChild>
+          <Link href="/upload">
+            <PlusCircle />
+            {t("documentsPage.addDocument")}
+          </Link>
         </Button>
       </div>
 
@@ -240,5 +243,3 @@ function DocumentsTable({ documents, onViewDetails }: { documents: typeof mockDo
     </Table>
   );
 }
-
-
