@@ -48,7 +48,7 @@ export function useDocuments() {
     });
   }, []);
 
-  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus, user: { id: string; name: string }, actionMessage?: string) => {
+  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus, user: { id: string; name: string }, actionMessage: string) => {
     setDocuments(prevDocs => {
       const newDocuments = prevDocs.map(doc => {
         if (doc.id === docId) {
@@ -56,13 +56,13 @@ export function useDocuments() {
             id: `log-${Date.now()}`,
             userId: user.id,
             userName: user.name,
-            action: actionMessage || `Status changed to ${status}`,
+            action: actionMessage, // Use the provided message directly
             timestamp: new Date().toISOString(),
           };
           
           const updatedAuditLog = doc.auditLog ? [...doc.auditLog, newAuditLogEntry] : [newAuditLogEntry];
 
-          return { ...doc, status: status, auditLog: updatedAuditLog };
+          return { ...doc, status, auditLog: updatedAuditLog };
         }
         return doc;
       });
@@ -88,3 +88,4 @@ export function useDocuments() {
 
   return { documents, addDocument, updateDocumentStatus, addAuditLogEntry, isLoaded };
 }
+

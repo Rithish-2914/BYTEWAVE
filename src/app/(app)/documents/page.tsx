@@ -400,11 +400,10 @@ function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => vo
             actionMessage = `Status changed to ${status} and commented: "${comment.trim()}"`;
         } else if (statusChanged) {
             actionMessage = `Status changed to ${status}`;
-        } else if (commentAdded) {
+        } else { // only comment added
             actionMessage = `Commented: "${comment.trim()}"`;
         }
         
-        // Pass the new status and the constructed action message
         updateDocumentStatus(doc.id, status, currentUser, actionMessage);
         
         setIsSaving(false);
