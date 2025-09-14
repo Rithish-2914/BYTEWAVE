@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -48,9 +49,10 @@ type FormValues = z.infer<typeof formSchema>;
 type UploadFormProps = {
   fileName: string;
   aiData: Partial<FormValues> & { title: string };
+  onReset: () => void;
 };
 
-export function UploadForm({ fileName, aiData }: UploadFormProps) {
+export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -71,6 +73,7 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
       title: t("uploadForm.reviewAndAssign"),
       description: `"${data.title}" has been assigned to ${data.department}.`,
     });
+    onReset(); // Go back to upload screen
   };
 
   return (
@@ -201,7 +204,7 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
             />
             
             <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline">{t("uploadForm.reset")}</Button>
+                <Button type="button" variant="outline" onClick={onReset}>{t("uploadForm.cancel")}</Button>
                 <Button type="submit">{t("uploadForm.confirmAndNotify")}</Button>
             </div>
           </form>
