@@ -14,6 +14,7 @@ import {
   UploadCloud,
   Users,
   Bell,
+  Waves,
 } from "lucide-react";
 
 import {
@@ -61,8 +62,8 @@ export function AppSidebar() {
           href="/dashboard"
           className="flex items-center gap-2 font-headline font-bold text-lg text-sidebar-foreground transition-colors hover:text-sidebar-accent-foreground"
         >
-          <BrainCircuit className="h-7 w-7 text-primary" />
-          <span className={state === "collapsed" ? "hidden" : "inline"}>InfoSync</span>
+          <Waves className="h-7 w-7 text-primary" />
+          <span className={state === "collapsed" ? "hidden" : "inline"}>ByteWave</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

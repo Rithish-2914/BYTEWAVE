@@ -7,8 +7,8 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 
 export const metadata: Metadata = {
-  title: "Kochi Metro InfoSync",
-  description: "Unified Document Intelligence for KMRL",
+  title: "ByteWave",
+  description: "Unified Document Intelligence Platform",
 };
 
 export default function RootLayout({
