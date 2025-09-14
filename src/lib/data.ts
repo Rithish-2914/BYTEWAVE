@@ -1,7 +1,7 @@
 
 import type { Document } from "./types";
 import { DEPARTMENTS, DOCUMENT_CATEGORIES, DOCUMENT_STATUSES, URGENCY_LEVELS } from "./constants";
-import { allUsers } from "./users";
+import { allUsers, getDepartmentHead } from "./users";
 
 
 const documentTitles = [
@@ -36,17 +36,28 @@ const documentTitles = [
 export const mockDocuments: Document[] = Array.from({ length: 25 }, (_, i) => {
     const date = new Date(Date.UTC(2024, 6, 15 - (i % 15)));
     const deadlineDate = new Date(date.getTime() + ((i % 5) * 5 * 24 * 60 * 60 * 1000));
+    const department = DEPARTMENTS[i % DEPARTMENTS.length];
+    let assignee = getDepartmentHead(department);
+    
+    // If no specific head, assign to admin
+    if (!assignee) {
+        assignee = allUsers.find(u => u.role === 'Admin')!;
+    }
   
   return {
     id: `DOC-${1001 + i}`,
     title: documentTitles[i],
     category: DOCUMENT_CATEGORIES[i % DOCUMENT_CATEGORIES.length],
-    department: DEPARTMENTS[i % DEPARTMENTS.length],
+    department: department,
     urgency: URGENCY_LEVELS[i % URGENCY_LEVELS.length] as "low" | "medium" | "high",
     status: DOCUMENT_STATUSES[i % DOCUMENT_STATUSES.length] as "Pending" | "In Review" | "Approved" | "Rejected",
     createdAt: date.toISOString(),
     deadline: (i % 3 === 0) ? deadlineDate.toISOString().split('T')[0] : undefined,
     summary: "This is an AI-generated summary placeholder for the document. It provides a concise overview of the key points, actions, and entities mentioned within the source file.",
-    assignee: allUsers.find(u => u.role === 'Admin')!,
+    assignee: {
+        id: assignee.id,
+        name: assignee.name,
+        avatarUrl: assignee.avatarUrl,
+    },
   };
 });

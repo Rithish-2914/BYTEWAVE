@@ -12,6 +12,7 @@ export type Document = {
   deadline?: string;
   summary: string;
   assignee: {
+    id: string;
     name: string;
     avatarUrl: string;
   };

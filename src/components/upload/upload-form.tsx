@@ -38,6 +38,7 @@ import { useLanguage } from "../providers/language-provider";
 import { useDocuments } from "@/hooks/use-documents";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../providers/auth-provider";
+import { getDepartmentHead, allUsers } from "@/lib/users";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -83,6 +84,13 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
     if (!currentUser) return;
     
     console.log("Form Submitted", data);
+    
+    let assignee = getDepartmentHead(data.department);
+    if (!assignee) {
+        // Default to admin if no department head is found
+        assignee = allUsers.find(u => u.role === 'Admin')!;
+    }
+
 
     const newDocument = {
         id: `DOC-${Date.now()}`,
@@ -95,8 +103,9 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
         status: 'Pending' as const,
         createdAt: new Date().toISOString(),
         assignee: {
-            name: currentUser.name,
-            avatarUrl: currentUser.avatarUrl
+            id: assignee.id,
+            name: assignee.name,
+            avatarUrl: assignee.avatarUrl
         }
     };
 
@@ -104,7 +113,7 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
 
     toast({
       title: t("uploadForm.reviewAndAssign"),
-      description: `"${data.title}" has been assigned. The ${data.department} department head has been notified.`,
+      description: `"${data.title}" has been assigned to ${assignee.name}. The ${data.department} department head has been notified.`,
     });
     router.push('/documents');
   };

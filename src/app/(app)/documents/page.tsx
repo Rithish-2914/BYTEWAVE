@@ -109,6 +109,8 @@ export default function DocumentsPage() {
     currentUser?.role === 'Admin' || doc.department === currentUser?.department
   );
   
+  const canTakeAction = currentUser && selectedDocument && selectedDocument.assignee.id === currentUser.id && (selectedDocument.status === 'Pending' || selectedDocument.status === 'In Review');
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -204,7 +206,7 @@ export default function DocumentsPage() {
                   </div>
               </div>
               <DialogFooter>
-                {currentUser?.role !== 'Employee' && selectedDocument.status !== 'Approved' && selectedDocument.status !== 'Rejected' && (
+                {canTakeAction && (
                     <div className="flex justify-end gap-2">
                         <Button variant="outline" onClick={() => handleStatusChange(selectedDocument.id, 'Rejected')}>{t('actions.reject')}</Button>
                         <Button onClick={() => handleStatusChange(selectedDocument.id, 'Approved')}>{t('actions.approve')}</Button>

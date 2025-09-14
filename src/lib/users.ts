@@ -66,3 +66,12 @@ export const allUsers: User[] = [
 export const findUserById = (id: string): User | undefined => {
     return allUsers.find(user => user.id === id);
 }
+
+
+// Function to get the head of a department (Director or Manager)
+export const getDepartmentHead = (department: string): User | undefined => {
+    return allUsers.find(user => 
+        user.department === department && 
+        (user.role === 'Director' || user.role === 'Manager')
+    );
+}
