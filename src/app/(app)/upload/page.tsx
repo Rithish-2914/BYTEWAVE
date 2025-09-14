@@ -4,25 +4,35 @@ import { useState } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { UploadForm } from "@/components/upload/upload-form";
 import { useLanguage } from "@/components/providers/language-provider";
+import { summarizeUploadedDocument } from "@/ai/flows/summarize-uploaded-document";
+import { assignDepartmentAndUrgency } from "@/ai/flows/assign-department-and-urgency";
 
-// Mock AI functions
-const summarizeUploadedDocument = async (file: File) => {
-  await new Promise(res => setTimeout(res, 1000));
-  return { summary: `This is a mock AI summary for ${file.name}. It highlights key information and suggests action items based on the document's content.` };
+const readFileAsDataURI = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    reader.readAsDataURL(file);
+  });
 };
 
-const assignDepartmentAndUrgency = async (content: string) => {
-  await new Promise(res => setTimeout(res, 1000));
-  const departments = ["Engineering & Projects", "Finance & Accounts", "Human Resources (HR) & Administration"];
-  const urgencies = ["low", "medium", "high"];
-  const deadline = new Date();
-  deadline.setDate(deadline.getDate() + 7);
-  return {
-    department: departments[Math.floor(Math.random() * departments.length)],
-    urgency: urgencies[Math.floor(Math.random() * urgencies.length)] as "low" | "medium" | "high",
-    deadline: deadline.toISOString(),
-  };
-};
+const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result as string);
+        };
+        reader.onerror = (error) => {
+            reject(error);
+        };
+        reader.readAsText(file);
+    });
+}
+
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -37,21 +47,28 @@ export default function UploadPage() {
     setIsProcessing(true);
     setAiData(null);
 
-    // Simulate reading file content
-    const fileContent = "mock file content";
+    try {
+      // Run AI flows in parallel
+      const [documentDataUri, documentContent] = await Promise.all([
+          readFileAsDataURI(selectedFile),
+          readFileAsText(selectedFile)
+      ]);
 
-    // Run AI flows in parallel
-    const [summaryResult, assignmentResult] = await Promise.all([
-      summarizeUploadedDocument(selectedFile),
-      assignDepartmentAndUrgency(fileContent),
-    ]);
+      const [summaryResult, assignmentResult] = await Promise.all([
+        summarizeUploadedDocument({ documentDataUri }),
+        assignDepartmentAndUrgency({ documentContent }),
+      ]);
 
-    setAiData({
-        title: selectedFile.name.replace(/\.[^/.]+$/, ""),
-        ...summaryResult,
-        ...assignmentResult
-    });
-    setIsProcessing(false);
+      setAiData({
+          title: selectedFile.name.replace(/\.[^/.]+$/, ""),
+          ...summaryResult,
+          ...assignmentResult
+      });
+    } catch(e) {
+        console.error(e);
+    } finally {
+        setIsProcessing(false);
+    }
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
