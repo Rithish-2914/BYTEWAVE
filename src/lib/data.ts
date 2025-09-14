@@ -1,4 +1,5 @@
 
+
 import type { Document } from "./types";
 import { DEPARTMENTS, DOCUMENT_CATEGORIES, DOCUMENT_STATUSES, URGENCY_LEVELS } from "./constants";
 import { allUsers, getDepartmentHead } from "./users";
@@ -43,6 +44,8 @@ export const mockDocuments: Document[] = Array.from({ length: 25 }, (_, i) => {
     if (!assignee) {
         assignee = allUsers.find(u => u.role === 'Admin')!;
     }
+    
+    const createdAt = date.toISOString();
   
   return {
     id: `DOC-${1001 + i}`,
@@ -51,7 +54,7 @@ export const mockDocuments: Document[] = Array.from({ length: 25 }, (_, i) => {
     department: department,
     urgency: URGENCY_LEVELS[i % URGENCY_LEVELS.length] as "low" | "medium" | "high",
     status: DOCUMENT_STATUSES[i % DOCUMENT_STATUSES.length] as "Pending" | "In Review" | "Approved" | "Rejected",
-    createdAt: date.toISOString(),
+    createdAt: createdAt,
     deadline: (i % 3 === 0) ? deadlineDate.toISOString().split('T')[0] : undefined,
     summary: "This is an AI-generated summary placeholder for the document. It provides a concise overview of the key points, actions, and entities mentioned within the source file.",
     assignee: {
@@ -59,5 +62,14 @@ export const mockDocuments: Document[] = Array.from({ length: 25 }, (_, i) => {
         name: assignee.name,
         avatarUrl: assignee.avatarUrl,
     },
+    auditLog: [
+      {
+        id: `log-${Date.now()}`,
+        userId: allUsers.find(u => u.role === 'Admin')!.id,
+        userName: allUsers.find(u => u.role === 'Admin')!.name,
+        action: `Document created and assigned to ${assignee.name}.`,
+        timestamp: createdAt,
+      }
+    ],
   };
 });

@@ -1,5 +1,14 @@
 
+
 export type DocumentStatus = "Pending" | "In Review" | "Approved" | "Rejected";
+
+export type AuditLogEntry = {
+  id: string;
+  userId: string;
+  userName: string;
+  action: string;
+  timestamp: string;
+};
 
 export type Document = {
   id: string;
@@ -16,6 +25,7 @@ export type Document = {
     name: string;
     avatarUrl: string;
   };
+  auditLog?: AuditLogEntry[];
 };
 
 export type NavItem = {

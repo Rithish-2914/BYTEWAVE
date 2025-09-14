@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -39,6 +40,7 @@ import { useDocuments } from "@/hooks/use-documents";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../providers/auth-provider";
 import { getDepartmentHead, allUsers } from "@/lib/users";
+import { Document } from "@/lib/types";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -83,16 +85,14 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (!currentUser) return;
     
-    console.log("Form Submitted", data);
-    
     let assignee = getDepartmentHead(data.department);
     if (!assignee) {
         // Default to admin if no department head is found
         assignee = allUsers.find(u => u.role === 'Admin')!;
     }
 
-
-    const newDocument = {
+    const createdAt = new Date().toISOString();
+    const newDocument: Document = {
         id: `DOC-${Date.now()}`,
         title: data.title,
         summary: data.summary,
@@ -101,12 +101,21 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
         deadline: data.deadline?.toISOString().split('T')[0],
         category: 'Uncategorized',
         status: 'Pending' as const,
-        createdAt: new Date().toISOString(),
+        createdAt: createdAt,
         assignee: {
             id: assignee.id,
             name: assignee.name,
             avatarUrl: assignee.avatarUrl
-        }
+        },
+        auditLog: [
+            {
+                id: `log-${Date.now()}`,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                action: `Document created and assigned to ${assignee.name}.`,
+                timestamp: createdAt,
+            }
+        ]
     };
 
     addDocument(newDocument);

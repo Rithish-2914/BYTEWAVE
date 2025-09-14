@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { MoreHorizontal, PlusCircle } from "lucide-react";
@@ -31,7 +32,7 @@ import {
 import { DOCUMENT_STATUSES } from "@/lib/constants";
 import { useLanguage } from "@/components/providers/language-provider";
 import { useState, useEffect } from "react";
-import type { Document, DocumentStatus } from "@/lib/types";
+import type { Document, DocumentStatus, AuditLogEntry } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useDocuments } from "@/hooks/use-documents";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -75,7 +77,7 @@ const formatDate = (dateString: string | undefined, locale: string) => {
 
 const formatDateTime = (dateString: string | undefined, locale: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString(locale);
+    return new Date(dateString).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short'});
 };
 
 export default function DocumentsPage() {
@@ -98,8 +100,8 @@ export default function DocumentsPage() {
   };
   
   const confirmStatusChange = () => {
-    if (actionToConfirm) {
-        updateDocumentStatus(actionToConfirm.docId, actionToConfirm.status);
+    if (actionToConfirm && currentUser) {
+        updateDocumentStatus(actionToConfirm.docId, actionToConfirm.status, {id: currentUser.id, name: currentUser.name});
         setActionToConfirm(null);
         handleCloseDialog();
     }
@@ -109,7 +111,35 @@ export default function DocumentsPage() {
     currentUser?.role === 'Admin' || doc.department === currentUser?.department
   );
   
-  const canTakeAction = currentUser && selectedDocument && selectedDocument.assignee.id === currentUser.id && (selectedDocument.status === 'Pending' || selectedDocument.status === 'In Review');
+  const canTakeAction = currentUser && selectedDocument && selectedDocument.assignee.id === currentUser.id;
+
+  const getActionButtons = () => {
+    if (!canTakeAction || !selectedDocument) return null;
+
+    switch(selectedDocument.status) {
+        case 'Pending':
+        case 'In Review':
+            return (
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => handleStatusChange(selectedDocument.id, 'Rejected')}>{t('actions.reject')}</Button>
+                    <Button onClick={() => handleStatusChange(selectedDocument.id, 'Approved')}>{t('actions.approve')}</Button>
+                </div>
+            );
+        case 'Rejected':
+            return (
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => handleStatusChange(selectedDocument.id, 'Pending')}>{t('actions.reopen')}</Button>
+                    <Button onClick={() => handleStatusChange(selectedDocument.id, 'Approved')}>{t('actions.approve')}</Button>
+                </div>
+            );
+        case 'Approved':
+            // No actions for approved documents for now
+            return null;
+        default:
+            return null;
+    }
+  }
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -150,7 +180,7 @@ export default function DocumentsPage() {
       </Tabs>
 
       <Dialog open={!!selectedDocument} onOpenChange={(isOpen) => !isOpen && handleCloseDialog()}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col">
           {selectedDocument && (
             <>
               <DialogHeader>
@@ -159,59 +189,78 @@ export default function DocumentsPage() {
                   {t('documentsPage.detailsDialog.documentId')}: {selectedDocument.id}
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-6 py-4">
-                  <div className="flex flex-col gap-2">
-                      <h4 className="font-semibold">{t('documentsPage.detailsDialog.summary')}</h4>
-                      <p className="text-sm text-muted-foreground">{selectedDocument.summary}</p>
-                  </div>
-                  <Separator />
-                  <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                          <p className="text-sm font-medium text-muted-foreground">{t('table.status')}</p>
-                          <Badge variant="outline">{t(selectedDocument.status)}</Badge>
-                      </div>
-                      <div className="space-y-1">
-                          <p className="text-sm font-medium text-muted-foreground">{t('table.urgency')}</p>
-                          <Badge variant={getUrgencyBadgeVariant(selectedDocument.urgency)}>{t(selectedDocument.urgency)}</Badge>
-                      </div>
-                      <div className="space-y-1">
-                          <p className="text-sm font-medium text-muted-foreground">{t('table.assignee')}</p>
-                          <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                  <AvatarImage src={selectedDocument.assignee.avatarUrl} alt={selectedDocument.assignee.name} />
-                                  <AvatarFallback>{selectedDocument.assignee.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm">{selectedDocument.assignee.name}</span>
-                          </div>
-                      </div>
-                      <div className="space-y-1">
-                          <p className="text-sm font-medium text-muted-foreground">{t('table.deadline')}</p>
-                          <p className="text-sm">{formatDate(selectedDocument.deadline, language)}</p>
-                      </div>
-                      <div className="space-y-1">
-                          <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.createdAt')}</p>
-                          <p className="text-sm">{formatDateTime(selectedDocument.createdAt, language)}</p>
-                      </div>
-                       <div className="space-y-1">
-                          <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.department')}</p>
-                          <p className="text-sm">{selectedDocument.department}</p>
-                      </div>
-                  </div>
-                  <Separator />
-                  <div>
-                      <h4 className="font-semibold mb-4">{t('documentsPage.detailsDialog.auditLog')}</h4>
-                      <div className="text-center py-10 text-sm text-muted-foreground">
-                          <p>{t('documentsPage.detailsDialog.noAuditLog')}</p>
-                      </div>
-                  </div>
-              </div>
-              <DialogFooter>
-                {canTakeAction && (
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => handleStatusChange(selectedDocument.id, 'Rejected')}>{t('actions.reject')}</Button>
-                        <Button onClick={() => handleStatusChange(selectedDocument.id, 'Approved')}>{t('actions.approve')}</Button>
+              <ScrollArea className="flex-1 -mx-6 px-6">
+                <div className="grid gap-6 py-4">
+                    <div className="flex flex-col gap-2">
+                        <h4 className="font-semibold">{t('documentsPage.detailsDialog.summary')}</h4>
+                        <p className="text-sm text-muted-foreground">{selectedDocument.summary}</p>
                     </div>
-                )}
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">{t('table.status')}</p>
+                            <Badge variant="outline">{t(selectedDocument.status)}</Badge>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">{t('table.urgency')}</p>
+                            <Badge variant={getUrgencyBadgeVariant(selectedDocument.urgency)}>{t(selectedDocument.urgency)}</Badge>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">{t('table.assignee')}</p>
+                            <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                    <AvatarImage src={selectedDocument.assignee.avatarUrl} alt={selectedDocument.assignee.name} />
+                                    <AvatarFallback>{selectedDocument.assignee.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">{selectedDocument.assignee.name}</span>
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">{t('table.deadline')}</p>
+                            <p className="text-sm">{formatDate(selectedDocument.deadline, language)}</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.createdAt')}</p>
+                            <p className="text-sm">{formatDateTime(selectedDocument.createdAt, language)}</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.department')}</p>
+                            <p className="text-sm">{selectedDocument.department}</p>
+                        </div>
+                    </div>
+                    <Separator />
+                    <div>
+                        <h4 className="font-semibold mb-4">{t('documentsPage.detailsDialog.auditLog')}</h4>
+                        {selectedDocument.auditLog && selectedDocument.auditLog.length > 0 ? (
+                            <ul className="space-y-4">
+                                {selectedDocument.auditLog.map(log => (
+                                    <li key={log.id} className="flex items-start gap-3 text-sm">
+                                        <Avatar className="h-6 w-6 mt-0.5">
+                                            <AvatarImage src={allUsers.find(u => u.id === log.userId)?.avatarUrl} />
+                                            <AvatarFallback>{log.userName.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <p className="text-muted-foreground">
+                                                <span className="font-semibold text-foreground">{log.userName}</span>
+                                                &nbsp;{log.action}
+                                            </p>
+                                            <time className="text-xs text-muted-foreground/80">
+                                                {formatDateTime(log.timestamp, language)}
+                                            </time>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="text-center py-10 text-sm text-muted-foreground">
+                                <p>{t('documentsPage.detailsDialog.noAuditLog')}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+              </ScrollArea>
+              <DialogFooter className="mt-auto pt-4 border-t">
+                {getActionButtons()}
               </DialogFooter>
             </>
           )}
@@ -302,5 +351,3 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
     </Table>
   );
 }
-
-    

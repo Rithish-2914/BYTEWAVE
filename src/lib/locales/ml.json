@@ -1,4 +1,5 @@
 
+
 {
   "Dashboard": "ഡാഷ്ബോർഡ്",
   "Documents": "രേഖകൾ",
@@ -113,6 +114,7 @@
   "language.ml": "ML",
   "actions.approve": "അംഗീകരിക്കുക",
   "actions.reject": "നിരസിക്കുക",
+  "actions.reopen": "വീണ്ടും തുറക്കുക",
   "actions.confirmTitle": "ഉറപ്പാണോ?",
   "actions.confirmDescription": "സ്റ്റാറ്റസ് {status} ആയി മാറ്റണമെന്ന് നിങ്ങൾക്ക് ഉറപ്പാണോ?",
   "actions.confirm": "സ്ഥിരീകരിക്കുക",

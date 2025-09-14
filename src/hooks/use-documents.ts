@@ -1,8 +1,9 @@
 
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Document, DocumentStatus } from "@/lib/types";
+import type { Document, DocumentStatus, AuditLogEntry } from "@/lib/types";
 import { mockDocuments as initialDocuments } from "@/lib/data";
 
 const STORAGE_KEY = "documents";
@@ -47,11 +48,22 @@ export function useDocuments() {
     });
   }, []);
 
-  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus) => {
+  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus, user: { id: string; name: string }) => {
     setDocuments(prevDocs => {
-      const newDocuments = prevDocs.map(doc => 
-        doc.id === docId ? { ...doc, status } : doc
-      );
+      const newDocuments = prevDocs.map(doc => {
+        if (doc.id === docId) {
+          const newAuditLogEntry: AuditLogEntry = {
+            id: `log-${Date.now()}`,
+            userId: user.id,
+            userName: user.name,
+            action: `Status changed to ${status}`,
+            timestamp: new Date().toISOString(),
+          };
+          const updatedAuditLog = [...(doc.auditLog || []), newAuditLogEntry];
+          return { ...doc, status, auditLog: updatedAuditLog };
+        }
+        return doc;
+      });
       updateAndStoreDocuments(newDocuments);
       return newDocuments;
     });
