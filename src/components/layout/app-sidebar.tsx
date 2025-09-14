@@ -27,23 +27,26 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { NavItem } from "@/lib/types";
+import { useLanguage } from "@/components/providers/language-provider";
 
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/documents", label: "Documents", icon: FileText },
-  { href: "/upload", label: "Upload", icon: UploadCloud },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/ai-assistant", label: "AI Assistant", icon: BrainCircuit },
-  { href: "/analytics", label: "Analytics", icon: AreaChart, badge: 3 },
-  { href: "/archive", label: "Archive", icon: Archive },
-  { href: "/users", label: "Users", icon: Users },
-  { href: "/notifications", label: "Notifications", icon: Bell, badge: 5 },
-  { href: "/settings", label: "Settings", icon: Settings },
+
+const navItems: Omit<NavItem, 'label'> & {i18nKey: string}[] = [
+  { href: "/dashboard", i18nKey: "Dashboard", icon: LayoutDashboard },
+  { href: "/documents", i18nKey: "Documents", icon: FileText },
+  { href: "/upload", i18nKey: "Upload", icon: UploadCloud },
+  { href: "/search", i18nKey: "Search", icon: Search },
+  { href: "/ai-assistant", i18nKey: "AI Assistant", icon: BrainCircuit },
+  { href: "/analytics", i18nKey: "Analytics", icon: AreaChart, badge: 3 },
+  { href: "/archive", i18nKey: "Archive", icon: Archive },
+  { href: "/users", i18nKey: "Users", icon: Users },
+  { href: "/notifications", i18nKey: "Notifications", icon: Bell, badge: 5 },
+  { href: "/settings", i18nKey: "Settings", icon: Settings },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const { t } = useLanguage();
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
@@ -64,13 +67,13 @@ export function AppSidebar() {
                 asChild
                 isActive={pathname === item.href}
                 tooltip={{
-                  children: item.label,
+                  children: t(item.i18nKey),
                   className: "bg-primary text-primary-foreground",
                 }}
               >
                 <Link href={item.href}>
                   <item.icon />
-                  <span>{item.label}</span>
+                  <span>{t(item.i18nKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
