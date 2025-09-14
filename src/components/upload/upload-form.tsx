@@ -59,6 +59,12 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   const { t } = useLanguage();
   const router = useRouter();
 
+  const getValidDate = (date: any) => {
+    if (!date) return undefined;
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? undefined : d;
+  }
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,7 +72,7 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
       summary: aiData.summary || "",
       department: aiData.department || "",
       urgency: aiData.urgency || "medium",
-      deadline: aiData.deadline ? new Date(aiData.deadline) : undefined,
+      deadline: getValidDate(aiData.deadline),
     },
   });
 
