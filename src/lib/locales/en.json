@@ -1,3 +1,4 @@
+
 {
   "Dashboard": "Dashboard",
   "Documents": "Documents",
@@ -27,6 +28,12 @@
   "documentsPage.description": "Browse, manage, and track all documents.",
   "documentsPage.addDocument": "Add Document",
   "documentsPage.all": "All",
+  "documentsPage.detailsDialog.documentId": "Document ID",
+  "documentsPage.detailsDialog.summary": "AI-Generated Summary",
+  "documentsPage.detailsDialog.createdAt": "Created At",
+  "documentsPage.detailsDialog.department": "Department",
+  "documentsPage.detailsDialog.auditLog": "Audit Log / Follow-ups",
+  "documentsPage.detailsDialog.noAuditLog": "No audit log or follow-up actions recorded yet.",
   "table.title": "Title",
   "table.status": "Status",
   "table.urgency": "Urgency",

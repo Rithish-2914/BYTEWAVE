@@ -1,3 +1,4 @@
+
 {
   "Dashboard": "ഡാഷ്ബോർഡ്",
   "Documents": "രേഖകൾ",
@@ -27,6 +28,12 @@
   "documentsPage.description": "എല്ലാ പ്രമാണങ്ങളും ബ്രൗസ് ചെയ്യുക, നിയന്ത്രിക്കുക, ട്രാക്ക് ചെയ്യുക.",
   "documentsPage.addDocument": "പ്രമാണം ചേർക്കുക",
   "documentsPage.all": "എല്ലാം",
+  "documentsPage.detailsDialog.documentId": "പ്രമാണ ഐഡി",
+  "documentsPage.detailsDialog.summary": "AI-സൃഷ്ടിച്ച സംഗ്രഹം",
+  "documentsPage.detailsDialog.createdAt": "സൃഷ്ടിച്ചത്",
+  "documentsPage.detailsDialog.department": "വകുപ്പ്",
+  "documentsPage.detailsDialog.auditLog": "ഓഡിറ്റ് ലോഗ് / ഫോളോ-അപ്പുകൾ",
+  "documentsPage.detailsDialog.noAuditLog": "ഓഡിറ്റ് ലോഗോ ഫോളോ-അപ്പ് നടപടികളോ ഇതുവരെ രേഖപ്പെടുത്തിയിട്ടില്ല.",
   "table.title": "തലക്കെട്ട്",
   "table.status": "നില",
   "table.urgency": "അടിയന്തിരാവസ്ഥ",

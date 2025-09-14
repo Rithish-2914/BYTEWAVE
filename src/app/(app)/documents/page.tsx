@@ -1,6 +1,7 @@
+
 "use client";
 
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -28,6 +29,16 @@ import {
 } from "@/components/ui/tabs";
 import { DOCUMENT_STATUSES } from "@/lib/constants";
 import { useLanguage } from "@/components/providers/language-provider";
+import { useState } from "react";
+import type { Document } from "@/lib/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
   switch (urgency) {
@@ -42,6 +53,16 @@ function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
 
 export default function DocumentsPage() {
   const { t } = useLanguage();
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+
+  const handleViewDetails = (doc: Document) => {
+    setSelectedDocument(doc);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedDocument(null);
+  };
+  
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -67,19 +88,81 @@ export default function DocumentsPage() {
             ))}
         </TabsList>
         <TabsContent value="All">
-            <DocumentsTable documents={mockDocuments} />
+            <DocumentsTable documents={mockDocuments} onViewDetails={handleViewDetails} />
         </TabsContent>
         {DOCUMENT_STATUSES.map(status => (
             <TabsContent key={status} value={status}>
-                <DocumentsTable documents={mockDocuments.filter(d => d.status === status)} />
+                <DocumentsTable documents={mockDocuments.filter(d => d.status === status)} onViewDetails={handleViewDetails} />
             </TabsContent>
         ))}
       </Tabs>
+
+      <Dialog open={!!selectedDocument} onOpenChange={(isOpen) => !isOpen && handleCloseDialog()}>
+        <DialogContent className="sm:max-w-2xl">
+          {selectedDocument && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedDocument.title}</DialogTitle>
+                <DialogDescription>
+                  {t('documentsPage.detailsDialog.documentId')}: {selectedDocument.id}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-6 py-4">
+                  <div className="flex flex-col gap-2">
+                      <h4 className="font-semibold">{t('documentsPage.detailsDialog.summary')}</h4>
+                      <p className="text-sm text-muted-foreground">{selectedDocument.summary}</p>
+                  </div>
+                  <Separator />
+                  <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">{t('table.status')}</p>
+                          <Badge variant="outline">{t(selectedDocument.status)}</Badge>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">{t('table.urgency')}</p>
+                          <Badge variant={getUrgencyBadgeVariant(selectedDocument.urgency)}>{t(selectedDocument.urgency)}</Badge>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">{t('table.assignee')}</p>
+                          <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                  <AvatarImage src={selectedDocument.assignee.avatarUrl} alt={selectedDocument.assignee.name} />
+                                  <AvatarFallback>{selectedDocument.assignee.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm">{selectedDocument.assignee.name}</span>
+                          </div>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">{t('table.deadline')}</p>
+                          <p className="text-sm">{selectedDocument.deadline ? new Date(selectedDocument.deadline).toLocaleDateString() : 'N/A'}</p>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.createdAt')}</p>
+                          <p className="text-sm">{new Date(selectedDocument.createdAt).toLocaleString()}</p>
+                      </div>
+                       <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.department')}</p>
+                          <p className="text-sm">{selectedDocument.department}</p>
+                      </div>
+                  </div>
+                  <Separator />
+                  <div>
+                      <h4 className="font-semibold mb-4">{t('documentsPage.detailsDialog.auditLog')}</h4>
+                      <div className="text-center py-10 text-sm text-muted-foreground">
+                          <p>{t('documentsPage.detailsDialog.noAuditLog')}</p>
+                      </div>
+                  </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
 
-function DocumentsTable({ documents }: { documents: typeof mockDocuments }) {
+function DocumentsTable({ documents, onViewDetails }: { documents: typeof mockDocuments, onViewDetails: (doc: Document) => void }) {
   const { t } = useLanguage();
   return (
     <Table>
@@ -125,7 +208,7 @@ function DocumentsTable({ documents }: { documents: typeof mockDocuments }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{t("table.actions")}</DropdownMenuLabel>
-                  <DropdownMenuItem>{t("table.viewDetails")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onViewDetails(doc)}>{t("table.viewDetails")}</DropdownMenuItem>
                   <DropdownMenuItem>{t("table.edit")}</DropdownMenuItem>
                   <DropdownMenuItem>{t("table.viewAuditLog")}</DropdownMenuItem>
                 </DropdownMenuContent>
@@ -137,3 +220,4 @@ function DocumentsTable({ documents }: { documents: typeof mockDocuments }) {
     </Table>
   );
 }
+
