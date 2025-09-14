@@ -5,16 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Languages, Mic, Send, User, Volume2 } from "lucide-react";
+import { Bot, Mic, Send, User, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/providers/language-provider";
+import { aiAssistantDocumentUnderstanding } from "@/ai/flows/ai-assistant-document-understanding";
 
 type Message = {
   id: number;
@@ -27,15 +22,16 @@ export default function AiAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! How can I help you understand your documents today? Feel free to ask me in English or Malayalam.",
+      text: "Hello! How can I help you with your documents today? Ask in English or Malayalam.",
       sender: "bot",
     },
   ]);
   const [input, setInput] = useState("");
-  const [language, setLanguage] = useState("en");
   const [isBotTyping, setIsBotTyping] = useState(false);
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { language, setLanguage } = useLanguage();
+  const [responseType, setResponseType] = useState<'text' | 'audio'>('text');
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -58,23 +54,56 @@ export default function AiAssistantPage() {
     setInput("");
     setIsBotTyping(true);
 
-    // Mock AI response
-    setTimeout(() => {
+    try {
+      // This is a placeholder for a real document context
+      const documentText = "The quick brown fox jumps over the lazy dog. The main action item is to review safety protocols.";
+
+      const result = await aiAssistantDocumentUnderstanding({
+        documentText,
+        query: input,
+        language: language,
+        responseType: responseType,
+      });
+
       const botResponse: Message = {
         id: Date.now() + 1,
-        text: `Based on the document, the main action item is to review the safety protocols by the end of the week. (This is a mock response in ${language === 'en' ? 'English' : 'Malayalam'})`,
+        text: responseType === 'text' ? result.response : 'Audio response generated.',
+        sender: "bot",
+        audio: responseType === 'audio' ? result.response : undefined
+      };
+      setMessages((prev) => [...prev, botResponse]);
+
+    } catch (error) {
+       console.error("Error calling AI assistant:", error);
+       toast({
+         variant: "destructive",
+         title: "Error",
+         description: "Failed to get a response from the AI assistant.",
+       });
+       const botResponse: Message = {
+        id: Date.now() + 1,
+        text: "Sorry, I encountered an error. Please try again.",
         sender: "bot",
       };
       setMessages((prev) => [...prev, botResponse]);
-      setIsBotTyping(false);
-    }, 1500);
+    } finally {
+        setIsBotTyping(false);
+    }
   };
   
   const handlePlayAudio = (audioData: string | undefined) => {
     if (!audioData) return;
-    toast({ title: "Playing Audio", description: "Audio playback is a demo feature." });
-    // const audio = new Audio(audioData);
-    // audio.play();
+    try {
+      const audio = new Audio(audioData);
+      audio.play();
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      toast({
+        variant: "destructive",
+        title: "Audio Error",
+        description: "Could not play the generated audio.",
+      });
+    }
   };
 
   return (
@@ -113,7 +142,7 @@ export default function AiAssistantPage() {
                   )}
                 >
                   <p>{message.text}</p>
-                   {message.sender === "bot" && (
+                   {message.audio && message.sender === "bot" && (
                        <Button variant="ghost" size="icon" className="h-7 w-7 mt-2" onClick={() => handlePlayAudio(message.audio)}>
                            <Volume2 className="h-4 w-4" />
                        </Button>
@@ -143,18 +172,24 @@ export default function AiAssistantPage() {
         </ScrollArea>
 
         <div className="mt-auto flex items-center gap-2 border-t pt-4">
-          <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger className="w-[140px]">
-              <div className="flex items-center gap-2">
-                <Languages className="h-4 w-4" />
-                <SelectValue />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="ml">Malayalam</SelectItem>
-            </SelectContent>
-          </Select>
+           <div className="flex items-center gap-1">
+              <Button 
+                variant={responseType === 'text' ? 'secondary': 'ghost'} 
+                size="icon" 
+                onClick={() => setResponseType('text')}
+                aria-label="Text response"
+              >
+                T
+              </Button>
+               <Button 
+                variant={responseType === 'audio' ? 'secondary': 'ghost'} 
+                size="icon" 
+                onClick={() => setResponseType('audio')}
+                aria-label="Audio response"
+              >
+                <Volume2 className="h-4 w-4" />
+              </Button>
+            </div>
           <div className="relative flex-1">
             <Input
               value={input}

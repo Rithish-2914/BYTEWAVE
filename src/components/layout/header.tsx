@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "./theme-toggle";
 import { UserNav } from "./user-nav";
+import { LanguageToggle } from "./language-toggle";
 
 export function Header() {
   return (
@@ -32,6 +33,7 @@ export function Header() {
           </span>
           <span className="sr-only">Notifications</span>
         </Button>
+        <LanguageToggle />
         <ThemeToggle />
         <UserNav />
       </div>
