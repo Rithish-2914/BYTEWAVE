@@ -65,16 +65,21 @@ const aiAssistantDocumentUnderstandingPrompt = ai.definePrompt({
     query: z.string(),
   })},
   output: {schema: z.object({response: z.string()})},
-  prompt: `You are an AI assistant specializing in understanding a collection of documents. A user has provided a set of documents and has a question. Answer the user's query based on the content of ALL the provided documents.
+  prompt: `You are an AI assistant specializing in understanding a collection of documents. A user has provided a set of documents and has a question. Your primary goal is to answer the user's query based on the content of the provided documents.
 
-If the user asks a general question, you can start by summarizing the available documents.
-
+{{#if documentText}}
+You have the following document collection to analyze:
 Document Collection Content:
 {{{documentText}}}
 
 User Query: {{{query}}}
 
-Provide a concise and informative answer in English, drawing from any of the documents in the collection.
+Please provide a concise and informative answer in English, drawing from any of the documents in the collection. If the user asks a general question (like "what can you do?" or "summarize everything"), you should start by summarizing the available documents.
+{{else}}
+The user has not provided any documents yet. Inform the user that no documents are available and that they should upload a document first to ask questions about it.
+User Query: {{{query}}}
+Respond in English.
+{{/if}}
 `,
 });
 
