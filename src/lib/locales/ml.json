@@ -121,5 +121,11 @@
   "actions.cancel": "റദ്ദാക്കുക",
   "unauthorized.title": "അംഗീകാരമില്ലാത്തത്",
   "unauthorized.description": "ഈ പേജ് ആക്സസ് ചെയ്യാൻ നിങ്ങൾക്ക് അനുമതിയില്ല.",
-  "unauthorized.button": "ഡാഷ്ബോർഡിലേക്ക് പോകുക"
+  "unauthorized.button": "ഡാഷ്ബോർഡിലേക്ക് പോകുക",
+  "editDialog.title": "പ്രമാണം തിരുത്തുക",
+  "editDialog.status": "നില മാറ്റുക",
+  "editDialog.selectStatus": "പുതിയ നില തിരഞ്ഞെടുക്കുക",
+  "editDialog.addFollowUp": "ഫോളോ-അപ്പ് / അഭിപ്രായം ചേർക്കുക",
+  "editDialog.commentPlaceholder": "നിങ്ങളുടെ അഭിപ്രായം ഇവിടെ ടൈപ്പ് ചെയ്യുക...",
+  "editDialog.save": "മാറ്റങ്ങൾ സംരക്ഷിക്കുക"
 }

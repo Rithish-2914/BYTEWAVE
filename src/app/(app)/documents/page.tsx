@@ -55,6 +55,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { allUsers } from "@/lib/users";
 
 function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
   switch (urgency) {
@@ -82,18 +86,28 @@ const formatDateTime = (dateString: string | undefined, locale: string) => {
 
 export default function DocumentsPage() {
   const { t, language } = useLanguage();
-  const { documents, updateDocumentStatus } = useDocuments();
+  const { documents, updateDocumentStatus, addAuditLogEntry } = useDocuments();
   const { currentUser } = useAuth();
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [actionToConfirm, setActionToConfirm] = useState<{docId: string; status: DocumentStatus} | null>(null);
 
   const handleViewDetails = (doc: Document) => {
     setSelectedDocument(doc);
   };
+  
+  const handleEdit = (doc: Document) => {
+    setEditingDocument(doc);
+  };
+
 
   const handleCloseDialog = () => {
     setSelectedDocument(null);
   };
+  
+  const handleCloseEditDialog = () => {
+    setEditingDocument(null);
+  }
 
   const handleStatusChange = (docId: string, status: DocumentStatus) => {
     setActionToConfirm({ docId, status });
@@ -170,11 +184,11 @@ export default function DocumentsPage() {
             ))}
         </TabsList>
         <TabsContent value="All">
-            <DocumentsTable documents={userDocuments} onViewDetails={handleViewDetails} />
+            <DocumentsTable documents={userDocuments} onViewDetails={handleViewDetails} onEdit={handleEdit} />
         </TabsContent>
         {DOCUMENT_STATUSES.map(status => (
             <TabsContent key={status} value={status}>
-                <DocumentsTable documents={userDocuments.filter(d => d.status === status)} onViewDetails={handleViewDetails} />
+                <DocumentsTable documents={userDocuments.filter(d => d.status === status)} onViewDetails={handleViewDetails} onEdit={handleEdit} />
             </TabsContent>
         ))}
       </Tabs>
@@ -267,6 +281,13 @@ export default function DocumentsPage() {
         </DialogContent>
       </Dialog>
       
+      {editingDocument && (
+        <EditDocumentDialog 
+            doc={editingDocument} 
+            onClose={handleCloseEditDialog} 
+        />
+      )}
+
        <AlertDialog open={!!actionToConfirm} onOpenChange={() => setActionToConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -286,7 +307,7 @@ export default function DocumentsPage() {
   );
 }
 
-function DocumentsTable({ documents, onViewDetails }: { documents: Document[], onViewDetails: (doc: Document) => void }) {
+function DocumentsTable({ documents, onViewDetails, onEdit }: { documents: Document[], onViewDetails: (doc: Document) => void, onEdit: (doc: Document) => void }) {
   const { t, language } = useLanguage();
   const [isClient, setIsClient] = useState(false);
 
@@ -336,11 +357,11 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
                     <span className="sr-only">{t("table.toggleMenu")}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenuLabel>{t("table.actions")}</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => onViewDetails(doc)}>{t("table.viewDetails")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit(doc)}>{t("table.edit")}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>{t("table.edit")}</DropdownMenuItem>
                   <DropdownMenuItem>{t("table.viewAuditLog")}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -350,4 +371,94 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
       </TableBody>
     </Table>
   );
+}
+
+
+function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => void }) {
+    const { t } = useLanguage();
+    const { currentUser } = useAuth();
+    const { updateDocumentStatus, addAuditLogEntry } = useDocuments();
+    const [status, setStatus] = useState<DocumentStatus>(doc.status);
+    const [comment, setComment] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSaveChanges = () => {
+        if (!currentUser) return;
+        setIsSaving(true);
+        
+        let hasChanges = false;
+        
+        // 1. Update status if changed
+        if (status !== doc.status) {
+            updateDocumentStatus(doc.id, status, currentUser, `Status changed to ${status} via edit.`);
+            hasChanges = true;
+        }
+
+        // 2. Add comment to audit log if provided
+        if (comment.trim()) {
+            addAuditLogEntry(doc.id, {
+                id: `log-${Date.now()}`,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                action: `Comment: ${comment.trim()}`,
+                timestamp: new Date().toISOString(),
+            });
+            hasChanges = true;
+        }
+        
+        // If only status changed without a comment, add a default log entry
+        if(status !== doc.status && !comment.trim()){
+             addAuditLogEntry(doc.id, {
+                id: `log-${Date.now()}`,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                action: `Status changed to ${status}.`,
+                timestamp: new Date().toISOString(),
+            });
+        }
+
+
+        setIsSaving(false);
+        onClose();
+    };
+
+
+    return (
+        <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{t('editDialog.title')}</DialogTitle>
+                    <DialogDescription>{doc.title}</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="status">{t('editDialog.status')}</Label>
+                         <Select value={status} onValueChange={(value) => setStatus(value as DocumentStatus)}>
+                            <SelectTrigger id="status">
+                                <SelectValue placeholder={t('editDialog.selectStatus')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {DOCUMENT_STATUSES.map(s => (
+                                    <SelectItem key={s} value={s}>{t(s)}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="audit-comment">{t('editDialog.addFollowUp')}</Label>
+                        <Textarea
+                            id="audit-comment"
+                            placeholder={t('editDialog.commentPlaceholder')}
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>{t('actions.cancel')}</Button>
+                    <Button onClick={handleSaveChanges} disabled={isSaving}>{t('editDialog.save')}</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }

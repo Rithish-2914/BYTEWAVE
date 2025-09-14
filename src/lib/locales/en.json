@@ -121,5 +121,11 @@
   "actions.cancel": "Cancel",
   "unauthorized.title": "Unauthorized",
   "unauthorized.description": "You do not have permission to access this page.",
-  "unauthorized.button": "Go to Dashboard"
+  "unauthorized.button": "Go to Dashboard",
+  "editDialog.title": "Edit Document",
+  "editDialog.status": "Change Status",
+  "editDialog.selectStatus": "Select a new status",
+  "editDialog.addFollowUp": "Add Follow-up / Comment",
+  "editDialog.commentPlaceholder": "Type your comment here...",
+  "editDialog.save": "Save Changes"
 }

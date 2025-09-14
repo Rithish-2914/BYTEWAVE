@@ -48,15 +48,15 @@ export function useDocuments() {
     });
   }, []);
 
-  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus, user: { id: string; name: string }) => {
+  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus, user: { id: string; name: string }, action?: string) => {
     setDocuments(prevDocs => {
       const newDocuments = prevDocs.map(doc => {
-        if (doc.id === docId) {
+        if (doc.id === docId && doc.status !== status) {
           const newAuditLogEntry: AuditLogEntry = {
             id: `log-${Date.now()}`,
             userId: user.id,
             userName: user.name,
-            action: `Status changed to ${status}`,
+            action: action || `Status changed to ${status}`,
             timestamp: new Date().toISOString(),
           };
           const updatedAuditLog = [...(doc.auditLog || []), newAuditLogEntry];
@@ -69,6 +69,20 @@ export function useDocuments() {
     });
   }, []);
 
+  const addAuditLogEntry = useCallback((docId: string, logEntry: AuditLogEntry) => {
+    setDocuments(prevDocs => {
+      const newDocuments = prevDocs.map(doc => {
+        if (doc.id === docId) {
+           const updatedAuditLog = [...(doc.auditLog || []), logEntry];
+           return { ...doc, auditLog: updatedAuditLog };
+        }
+        return doc;
+      });
+       updateAndStoreDocuments(newDocuments);
+       return newDocuments;
+    });
+  }, []);
 
-  return { documents, addDocument, updateDocumentStatus, isLoaded };
+
+  return { documents, addDocument, updateDocumentStatus, addAuditLogEntry, isLoaded };
 }
