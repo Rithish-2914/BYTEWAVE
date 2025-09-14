@@ -69,6 +69,7 @@
   "usersPage.placeholder": "User management interface will appear here.",
   "categoryChart.title": "Documents by Category",
   "categoryChart.description": "Distribution of all documents across different categories.",
+  "categoryChart.noData": "No documents with categories to display.",
   "statsCards.totalDocuments": "Total Documents",
   "statsCards.totalDocumentsDescription": "+20.1% from last month",
   "statsCards.pendingReview": "Pending Review",
@@ -108,3 +109,4 @@
   "language.en": "EN",
   "language.ml": "ML"
 }
+

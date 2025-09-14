@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Pie, PieChart, Cell } from "recharts";
@@ -15,10 +16,10 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
-import { DOCUMENT_CATEGORIES } from "@/lib/constants";
 import { useLanguage } from "../providers/language-provider";
 import type { Document } from "@/lib/types";
 import { Skeleton } from "../ui/skeleton";
+import { useMemo } from "react";
 
 const COLORS = [
   "hsl(var(--chart-1))",
@@ -29,20 +30,31 @@ const COLORS = [
   "hsl(210, 40%, 50%)",
   "hsl(140, 40%, 50%)",
   "hsl(300, 40%, 50%)",
+  "hsl(250, 50%, 60%)",
 ];
 
 export function CategoryChart({ documents, isLoaded }: { documents: Document[], isLoaded: boolean }) {
   const { t } = useLanguage();
 
-  const chartData = DOCUMENT_CATEGORIES.map((category) => ({
-    name: category,
-    value: documents.filter((doc) => doc.category === category).length,
-  }));
+  const chartData = useMemo(() => {
+    const categoryCounts = documents.reduce((acc, doc) => {
+        acc[doc.category] = (acc[doc.category] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
 
-  const chartConfig = chartData.reduce((acc, { name }) => {
+    return Object.entries(categoryCounts)
+      .filter(([, value]) => value > 0)
+      .map(([name, value]) => ({ name, value }));
+
+  }, [documents]);
+
+
+  const chartConfig = useMemo(() => chartData.reduce((acc, { name }) => {
     acc[name] = { label: name };
     return acc;
-  }, {} as any);
+  }, {} as any), [chartData]);
+
+  const noData = chartData.length === 0;
 
   return (
     <Card>
@@ -54,6 +66,11 @@ export function CategoryChart({ documents, isLoaded }: { documents: Document[], 
       </CardHeader>
       <CardContent>
         {isLoaded ? (
+          noData ? (
+             <div className="flex items-center justify-center mx-auto aspect-square max-h-[300px]">
+                <p className="text-muted-foreground">{t("categoryChart.noData")}</p>
+             </div>
+          ) : (
             <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
             <PieChart>
                 <ChartTooltip content={<ChartTooltipContent nameKey="value" hideLabel />} />
@@ -68,6 +85,7 @@ export function CategoryChart({ documents, isLoaded }: { documents: Document[], 
                 />
             </PieChart>
             </ChartContainer>
+          )
         ) : (
             <div className="flex items-center justify-center mx-auto aspect-square max-h-[300px]">
                  <Skeleton className="h-[300px] w-[300px] rounded-full" />
@@ -77,3 +95,4 @@ export function CategoryChart({ documents, isLoaded }: { documents: Document[], 
     </Card>
   );
 }
+

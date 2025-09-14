@@ -69,6 +69,7 @@
   "usersPage.placeholder": "ഉപയോക്തൃ ക്രമീകരണ ഇന്റർഫേസ് ഇവിടെ ദൃശ്യമാകും.",
   "categoryChart.title": "വിഭാഗം അനുസരിച്ചുള്ള പ്രമാണങ്ങൾ",
   "categoryChart.description": "വിവിധ വിഭാഗങ്ങളിലുടനീളമുള്ള എല്ലാ പ്രമാണങ്ങളുടെയും വിതരണം.",
+  "categoryChart.noData": "വിഭാഗങ്ങളുള്ള പ്രമാണങ്ങളൊന്നും പ്രദർശിപ്പിക്കാനില്ല.",
   "statsCards.totalDocuments": "ആകെ പ്രമാണങ്ങൾ",
   "statsCards.totalDocumentsDescription": "കഴിഞ്ഞ മാസത്തേക്കാൾ +20.1%",
   "statsCards.pendingReview": "അവലോകനത്തിനായി കാത്തിരിക്കുന്നു",
