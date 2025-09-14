@@ -51,7 +51,7 @@ export function useDocuments() {
   const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus, user: { id: string; name: string }, action?: string) => {
     setDocuments(prevDocs => {
       const newDocuments = prevDocs.map(doc => {
-        if (doc.id === docId && doc.status !== status) {
+        if (doc.id === docId) {
           const newAuditLogEntry: AuditLogEntry = {
             id: `log-${Date.now()}`,
             userId: user.id,

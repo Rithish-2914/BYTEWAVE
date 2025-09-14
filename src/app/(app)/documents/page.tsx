@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { MoreHorizontal, PlusCircle } from "lucide-react";
@@ -376,32 +377,35 @@ function DocumentsTable({ documents, onViewDetails, onEdit }: { documents: Docum
 function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => void }) {
     const { t } = useLanguage();
     const { currentUser } = useAuth();
-    const { updateDocumentStatus, addAuditLogEntry } = useDocuments();
+    const { updateDocumentStatus } = useDocuments();
     const [status, setStatus] = useState<DocumentStatus>(doc.status);
     const [comment, setComment] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSaveChanges = () => {
         if (!currentUser) return;
-        setIsSaving(true);
-
+        
         const statusChanged = status !== doc.status;
         const commentAdded = comment.trim() !== '';
 
-        if (statusChanged && commentAdded) {
-            updateDocumentStatus(doc.id, status, currentUser, `Status changed to ${status}. Comment: ${comment.trim()}`);
-        } else if (statusChanged) {
-            updateDocumentStatus(doc.id, status, currentUser, `Status changed to ${status}.`);
-        } else if (commentAdded) {
-            addAuditLogEntry(doc.id, {
-                id: `log-${Date.now()}`,
-                userId: currentUser.id,
-                userName: currentUser.name,
-                action: `Comment: ${comment.trim()}`,
-                timestamp: new Date().toISOString(),
-            });
+        if (!statusChanged && !commentAdded) {
+            onClose();
+            return;
         }
 
+        setIsSaving(true);
+        
+        let actionMessage = '';
+        if (statusChanged && commentAdded) {
+            actionMessage = `Status changed to ${status} and commented: ${comment.trim()}`;
+        } else if (statusChanged) {
+            actionMessage = `Status changed to ${status}`;
+        } else if (commentAdded) {
+            actionMessage = `Commented: ${comment.trim()}`;
+        }
+        
+        updateDocumentStatus(doc.id, status, currentUser, actionMessage);
+        
         setIsSaving(false);
         onClose();
     };
