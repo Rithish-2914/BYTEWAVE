@@ -115,7 +115,7 @@ export default function DocumentsPage() {
   
   const confirmStatusChange = () => {
     if (actionToConfirm && currentUser) {
-        updateDocumentStatus(actionToConfirm.docId, actionToConfirm.status, {id: currentUser.id, name: currentUser.name});
+        updateDocumentStatus(actionToConfirm.docId, actionToConfirm.status, {id: currentUser.id, name: currentUser.name}, `Status changed to ${actionToConfirm.status}`);
         setActionToConfirm(null);
         handleCloseDialog();
     }
@@ -397,13 +397,14 @@ function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => vo
         
         let actionMessage = '';
         if (statusChanged && commentAdded) {
-            actionMessage = `Status changed to ${status} and commented: ${comment.trim()}`;
+            actionMessage = `Status changed to ${status} and commented: "${comment.trim()}"`;
         } else if (statusChanged) {
             actionMessage = `Status changed to ${status}`;
         } else if (commentAdded) {
-            actionMessage = `Commented: ${comment.trim()}`;
+            actionMessage = `Commented: "${comment.trim()}"`;
         }
         
+        // Pass the new status and the constructed action message
         updateDocumentStatus(doc.id, status, currentUser, actionMessage);
         
         setIsSaving(false);
@@ -450,4 +451,3 @@ function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => vo
         </Dialog>
     );
 }
-    
