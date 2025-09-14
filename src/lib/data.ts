@@ -1,12 +1,8 @@
+
 import type { Document } from "./types";
 import { DEPARTMENTS, DOCUMENT_CATEGORIES, DOCUMENT_STATUSES, URGENCY_LEVELS } from "./constants";
+import { allUsers } from "./users";
 
-const users = [
-  { name: "Anjali Nair", avatarUrl: "https://picsum.photos/seed/user1/100/100" },
-  { name: "Benny Thomas", avatarUrl: "https://picsum.photos/seed/user2/100/100" },
-  { name: "Catherine D'Souza", avatarUrl: "https://picsum.photos/seed/user3/100/100" },
-  { name: "David Kumar", avatarUrl: "https://picsum.photos/seed/user4/100/100" },
-];
 
 const documentTitles = [
     "Civil Engineering Blueprint Q4",
@@ -51,6 +47,6 @@ export const mockDocuments: Document[] = Array.from({ length: 25 }, (_, i) => {
     createdAt: date.toISOString(),
     deadline: (i % 3 === 0) ? deadlineDate.toISOString().split('T')[0] : undefined,
     summary: "This is an AI-generated summary placeholder for the document. It provides a concise overview of the key points, actions, and entities mentioned within the source file.",
-    assignee: users[i % users.length],
+    assignee: allUsers.find(u => u.role === 'Admin')!,
   };
 });

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -11,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/components/providers/auth-provider";
+import { redirect } from 'next/navigation';
 
 const readFileAsDataURI = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -45,12 +48,21 @@ export default function UploadPage() {
   const [aiData, setAiData] = useState<any>(null);
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
+
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("file");
+
+
+  useEffect(() => {
+    if (currentUser?.role !== 'Admin') {
+      redirect('/dashboard');
+    }
+  }, [currentUser]);
 
 
   useEffect(() => {
@@ -187,6 +199,16 @@ export default function UploadPage() {
     setCapturedImage(null);
     setIsProcessing(false);
   }
+  
+  if (currentUser?.role !== 'Admin') {
+    return (
+        <div className="flex flex-col items-center justify-center gap-4 text-center h-full">
+            <h2 className="font-headline text-xl">{t("unauthorized.title")}</h2>
+            <p className="text-muted-foreground">{t("unauthorized.description")}</p>
+            <Button asChild><Link href="/dashboard">{t('unauthorized.button')}</Link></Button>
+        </div>
+    );
+  }
 
   if (isProcessing) {
     return (
@@ -273,4 +295,3 @@ export default function UploadPage() {
     </div>
   );
 }
-

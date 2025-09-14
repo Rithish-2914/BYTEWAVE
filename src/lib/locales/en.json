@@ -64,9 +64,11 @@
   "uploadPage.capture": "Capture",
   "uploadPage.cameraAccessDenied": "Camera Access Denied",
   "uploadPage.cameraAccessDescription": "Please allow camera access in your browser settings to use this feature.",
-  "usersPage.title": "User Management",
-  "usersPage.description": "Manage users and their permissions.",
+  "usersPage.title": "Switch User",
+  "usersPage.description": "Select a user to simulate logging in.",
   "usersPage.placeholder": "User management interface will appear here.",
+  "usersPage.role": "Role",
+  "usersPage.loginAs": "Login as",
   "categoryChart.title": "Documents by Category",
   "categoryChart.description": "Distribution of all documents across different categories.",
   "categoryChart.noData": "No documents with categories to display.",
@@ -85,6 +87,7 @@
   "userNav.profile": "Profile",
   "userNav.settings": "Settings",
   "userNav.logout": "Log out",
+  "userNav.login": "Login",
   "uploadForm.reviewAndAssign": "Review & Assign Document",
   "uploadForm.documentTitle": "Document Title",
   "uploadForm.documentTitlePlaceholder": "e.g., Q2 Maintenance Report",
@@ -107,6 +110,14 @@
   "Approved": "Approved",
   "Rejected": "Rejected",
   "language.en": "EN",
-  "language.ml": "ML"
+  "language.ml": "ML",
+  "actions.approve": "Approve",
+  "actions.reject": "Reject",
+  "actions.confirmTitle": "Are you sure?",
+  "actions.confirmDescription": "Are you sure you want to change the status to {status}?",
+  "actions.confirm": "Confirm",
+  "actions.cancel": "Cancel",
+  "unauthorized.title": "Unauthorized",
+  "unauthorized.description": "You do not have permission to access this page.",
+  "unauthorized.button": "Go to Dashboard"
 }
-

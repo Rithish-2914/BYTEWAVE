@@ -1,10 +1,13 @@
+
+export type DocumentStatus = "Pending" | "In Review" | "Approved" | "Rejected";
+
 export type Document = {
   id: string;
   title: string;
   category: string;
   department: string;
   urgency: "low" | "medium" | "high";
-  status: "Pending" | "In Review" | "Approved" | "Rejected";
+  status: DocumentStatus;
   createdAt: string;
   deadline?: string;
   summary: string;

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -7,7 +8,6 @@ import {
   Archive,
   BrainCircuit,
   FileText,
-  Home,
   LayoutDashboard,
   Search,
   Settings,
@@ -28,17 +28,18 @@ import {
 } from "@/components/ui/sidebar";
 import type { NavItem } from "@/lib/types";
 import { useLanguage } from "@/components/providers/language-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 
 
-const navItems: Omit<NavItem, 'label'> & {i18nKey: string}[] = [
+const allNavItems: Omit<NavItem, 'label'> & {i18nKey: string, roles?: string[]}[] = [
   { href: "/dashboard", i18nKey: "Dashboard", icon: LayoutDashboard },
   { href: "/documents", i18nKey: "Documents", icon: FileText },
-  { href: "/upload", i18nKey: "Upload", icon: UploadCloud },
+  { href: "/upload", i18nKey: "Upload", icon: UploadCloud, roles: ['Admin'] },
   { href: "/search", i18nKey: "Search", icon: Search },
   { href: "/ai-assistant", i18nKey: "AI Assistant", icon: BrainCircuit },
-  { href: "/analytics", i18nKey: "Analytics", icon: AreaChart, badge: 3 },
-  { href: "/archive", i18nKey: "Archive", icon: Archive },
-  { href: "/users", i18nKey: "Users", icon: Users },
+  { href: "/analytics", i18nKey: "Analytics", icon: AreaChart, roles: ['Admin', 'Manager', 'Director'] },
+  { href: "/archive", i18nKey: "Archive", icon: Archive, roles: ['Admin'] },
+  { href: "/users", i18nKey: "Users", icon: Users, roles: ['Admin'] },
   { href: "/notifications", i18nKey: "Notifications", icon: Bell, badge: 5 },
   { href: "/settings", i18nKey: "Settings", icon: Settings },
 ];
@@ -47,6 +48,11 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
   const { t } = useLanguage();
+  const { currentUser } = useAuth();
+  
+  const navItems = allNavItems.filter(item => 
+    !item.roles || (currentUser && item.roles.includes(currentUser.role))
+  );
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">

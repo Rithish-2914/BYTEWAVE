@@ -1,7 +1,7 @@
 
 "use client";
 
-import { MoreHorizontal, PlusCircle, X } from "lucide-react";
+import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import {
   Table,
@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -30,16 +31,28 @@ import {
 import { DOCUMENT_STATUSES } from "@/lib/constants";
 import { useLanguage } from "@/components/providers/language-provider";
 import { useState, useEffect } from "react";
-import type { Document } from "@/lib/types";
+import type { Document, DocumentStatus } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useDocuments } from "@/hooks/use-documents";
+import { useAuth } from "@/components/providers/auth-provider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
   switch (urgency) {
@@ -54,7 +67,6 @@ function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
 
 const formatDate = (dateString: string | undefined, locale: string) => {
     if (!dateString) return 'N/A';
-    // For 'YYYY-MM-DD' format, we need to specify UTC to avoid timezone shifts.
     if (dateString.length === 10 && !dateString.includes('T')) {
          return new Date(`${dateString}T00:00:00Z`).toLocaleDateString(locale, { timeZone: 'UTC' });
     }
@@ -68,8 +80,10 @@ const formatDateTime = (dateString: string | undefined, locale: string) => {
 
 export default function DocumentsPage() {
   const { t, language } = useLanguage();
-  const { documents } = useDocuments();
+  const { documents, updateDocumentStatus } = useDocuments();
+  const { currentUser } = useAuth();
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [actionToConfirm, setActionToConfirm] = useState<{docId: string; status: DocumentStatus} | null>(null);
 
   const handleViewDetails = (doc: Document) => {
     setSelectedDocument(doc);
@@ -78,6 +92,22 @@ export default function DocumentsPage() {
   const handleCloseDialog = () => {
     setSelectedDocument(null);
   };
+
+  const handleStatusChange = (docId: string, status: DocumentStatus) => {
+    setActionToConfirm({ docId, status });
+  };
+  
+  const confirmStatusChange = () => {
+    if (actionToConfirm) {
+        updateDocumentStatus(actionToConfirm.docId, actionToConfirm.status);
+        setActionToConfirm(null);
+        handleCloseDialog();
+    }
+  };
+
+  const userDocuments = documents.filter(doc => 
+    currentUser?.role === 'Admin' || doc.department === currentUser?.department
+  );
   
   return (
     <div className="flex flex-col gap-8">
@@ -90,12 +120,14 @@ export default function DocumentsPage() {
             {t("documentsPage.description")}
           </p>
         </div>
-        <Button asChild>
-          <Link href="/upload">
-            <PlusCircle />
-            {t("documentsPage.addDocument")}
-          </Link>
-        </Button>
+        {currentUser?.role === 'Admin' && (
+            <Button asChild>
+                <Link href="/upload">
+                    <PlusCircle />
+                    {t("documentsPage.addDocument")}
+                </Link>
+            </Button>
+        )}
       </div>
 
       <Tabs defaultValue="All">
@@ -106,11 +138,11 @@ export default function DocumentsPage() {
             ))}
         </TabsList>
         <TabsContent value="All">
-            <DocumentsTable documents={documents} onViewDetails={handleViewDetails} />
+            <DocumentsTable documents={userDocuments} onViewDetails={handleViewDetails} />
         </TabsContent>
         {DOCUMENT_STATUSES.map(status => (
             <TabsContent key={status} value={status}>
-                <DocumentsTable documents={documents.filter(d => d.status === status)} onViewDetails={handleViewDetails} />
+                <DocumentsTable documents={userDocuments.filter(d => d.status === status)} onViewDetails={handleViewDetails} />
             </TabsContent>
         ))}
       </Tabs>
@@ -171,10 +203,33 @@ export default function DocumentsPage() {
                       </div>
                   </div>
               </div>
+              <DialogFooter>
+                {currentUser?.role !== 'Employee' && selectedDocument.status !== 'Approved' && selectedDocument.status !== 'Rejected' && (
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => handleStatusChange(selectedDocument.id, 'Rejected')}>{t('actions.reject')}</Button>
+                        <Button onClick={() => handleStatusChange(selectedDocument.id, 'Approved')}>{t('actions.approve')}</Button>
+                    </div>
+                )}
+              </DialogFooter>
             </>
           )}
         </DialogContent>
       </Dialog>
+      
+       <AlertDialog open={!!actionToConfirm} onOpenChange={() => setActionToConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('actions.confirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('actions.confirmDescription', {status: t(actionToConfirm?.status || '')})}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setActionToConfirm(null)}>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStatusChange}>{t('actions.confirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   );
@@ -233,6 +288,7 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{t("table.actions")}</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => onViewDetails(doc)}>{t("table.viewDetails")}</DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem>{t("table.edit")}</DropdownMenuItem>
                   <DropdownMenuItem>{t("table.viewAuditLog")}</DropdownMenuItem>
                 </DropdownMenuContent>

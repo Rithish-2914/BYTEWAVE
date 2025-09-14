@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Document } from "@/lib/types";
+import type { Document, DocumentStatus } from "@/lib/types";
 import { mockDocuments as initialDocuments } from "@/lib/data";
 
 const STORAGE_KEY = "documents";
@@ -39,9 +40,23 @@ export function useDocuments() {
   };
   
   const addDocument = useCallback((doc: Document) => {
-    const newDocuments = [doc, ...documents];
-    updateAndStoreDocuments(newDocuments);
-  }, [documents]);
+    setDocuments(prevDocs => {
+      const newDocuments = [doc, ...prevDocs];
+      updateAndStoreDocuments(newDocuments);
+      return newDocuments;
+    });
+  }, []);
 
-  return { documents, addDocument, isLoaded };
+  const updateDocumentStatus = useCallback((docId: string, status: DocumentStatus) => {
+    setDocuments(prevDocs => {
+      const newDocuments = prevDocs.map(doc => 
+        doc.id === docId ? { ...doc, status } : doc
+      );
+      updateAndStoreDocuments(newDocuments);
+      return newDocuments;
+    });
+  }, []);
+
+
+  return { documents, addDocument, updateDocumentStatus, isLoaded };
 }

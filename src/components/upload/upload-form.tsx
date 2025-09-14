@@ -37,6 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "../providers/language-provider";
 import { useDocuments } from "@/hooks/use-documents";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../providers/auth-provider";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -59,6 +60,7 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   const { t } = useLanguage();
   const router = useRouter();
   const { addDocument } = useDocuments();
+  const { currentUser } = useAuth();
 
   const getValidDate = (date: any) => {
     if (!date) return undefined;
@@ -78,6 +80,8 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
+    if (!currentUser) return;
+    
     console.log("Form Submitted", data);
 
     const newDocument = {
@@ -91,8 +95,8 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
         status: 'Pending' as const,
         createdAt: new Date().toISOString(),
         assignee: {
-            name: "Admin",
-            avatarUrl: "https://picsum.photos/seed/user-admin/100/100"
+            name: currentUser.name,
+            avatarUrl: currentUser.avatarUrl
         }
     };
 
