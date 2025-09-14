@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { MoreHorizontal, PlusCircle } from "lucide-react";
@@ -385,17 +384,15 @@ function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => vo
     const handleSaveChanges = () => {
         if (!currentUser) return;
         setIsSaving(true);
-        
-        let hasChanges = false;
-        
-        // 1. Update status if changed
-        if (status !== doc.status) {
-            updateDocumentStatus(doc.id, status, currentUser, `Status changed to ${status} via edit.`);
-            hasChanges = true;
-        }
 
-        // 2. Add comment to audit log if provided
-        if (comment.trim()) {
+        const statusChanged = status !== doc.status;
+        const commentAdded = comment.trim() !== '';
+
+        if (statusChanged && commentAdded) {
+            updateDocumentStatus(doc.id, status, currentUser, `Status changed to ${status}. Comment: ${comment.trim()}`);
+        } else if (statusChanged) {
+            updateDocumentStatus(doc.id, status, currentUser, `Status changed to ${status}.`);
+        } else if (commentAdded) {
             addAuditLogEntry(doc.id, {
                 id: `log-${Date.now()}`,
                 userId: currentUser.id,
@@ -403,20 +400,7 @@ function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => vo
                 action: `Comment: ${comment.trim()}`,
                 timestamp: new Date().toISOString(),
             });
-            hasChanges = true;
         }
-        
-        // If only status changed without a comment, add a default log entry
-        if(status !== doc.status && !comment.trim()){
-             addAuditLogEntry(doc.id, {
-                id: `log-${Date.now()}`,
-                userId: currentUser.id,
-                userName: currentUser.name,
-                action: `Status changed to ${status}.`,
-                timestamp: new Date().toISOString(),
-            });
-        }
-
 
         setIsSaving(false);
         onClose();
@@ -462,3 +446,4 @@ function EditDocumentDialog({ doc, onClose }: { doc: Document, onClose: () => vo
         </Dialog>
     );
 }
+    
