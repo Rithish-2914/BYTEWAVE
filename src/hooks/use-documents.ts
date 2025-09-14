@@ -56,11 +56,13 @@ export function useDocuments() {
             id: `log-${Date.now()}`,
             userId: user.id,
             userName: user.name,
-            action: actionMessage || `Status changed to ${status}`, // Use provided message or default
+            action: actionMessage || `Status changed to ${status}`,
             timestamp: new Date().toISOString(),
           };
-          const updatedAuditLog = [...(doc.auditLog || []), newAuditLogEntry];
-          return { ...doc, status, auditLog: updatedAuditLog };
+          
+          const updatedAuditLog = doc.auditLog ? [...doc.auditLog, newAuditLogEntry] : [newAuditLogEntry];
+
+          return { ...doc, status: status, auditLog: updatedAuditLog };
         }
         return doc;
       });
