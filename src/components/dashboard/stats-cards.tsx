@@ -9,6 +9,7 @@ import {
 import { mockDocuments } from "@/lib/data";
 import { FileText, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 import { useLanguage } from "../providers/language-provider";
+import {useEffect, useState} from 'react';
 
 type StatCardProps = {
   title: string;
@@ -34,15 +35,22 @@ function StatCard({ title, value, icon: Icon, description }: StatCardProps) {
 
 export function StatsCards() {
   const { t } = useLanguage();
+  const [overdue, setOverdue] = useState(0);
+
+  useEffect(() => {
+    const now = new Date();
+    const overdueCount = mockDocuments.filter(
+      (doc) => doc.deadline && new Date(doc.deadline) < now && doc.status !== 'Approved'
+    ).length;
+    setOverdue(overdueCount);
+  }, []);
+
   const totalDocuments = mockDocuments.length;
   const pendingReview = mockDocuments.filter(
     (doc) => doc.status === "Pending" || doc.status === "In Review"
   ).length;
   const resolved = mockDocuments.filter(
     (doc) => doc.status === "Approved"
-  ).length;
-  const overdue = mockDocuments.filter(
-    (doc) => doc.deadline && new Date(doc.deadline) < new Date() && doc.status !== 'Approved'
   ).length;
 
   return (

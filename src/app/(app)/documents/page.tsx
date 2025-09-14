@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/tabs";
 import { DOCUMENT_STATUSES } from "@/lib/constants";
 import { useLanguage } from "@/components/providers/language-provider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Document } from "@/lib/types";
 import {
   Dialog,
@@ -51,8 +51,22 @@ function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
   }
 }
 
+const formatDate = (dateString: string | undefined, locale: string) => {
+    if (!dateString) return 'N/A';
+    // For 'YYYY-MM-DD' format, we need to specify UTC to avoid timezone shifts.
+    if (dateString.length === 10 && !dateString.includes('T')) {
+         return new Date(`${dateString}T00:00:00Z`).toLocaleDateString(locale, { timeZone: 'UTC' });
+    }
+    return new Date(dateString).toLocaleDateString(locale);
+};
+
+const formatDateTime = (dateString: string | undefined, locale: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString(locale);
+};
+
 export default function DocumentsPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   const handleViewDetails = (doc: Document) => {
@@ -134,11 +148,11 @@ export default function DocumentsPage() {
                       </div>
                       <div className="space-y-1">
                           <p className="text-sm font-medium text-muted-foreground">{t('table.deadline')}</p>
-                          <p className="text-sm">{selectedDocument.deadline ? new Date(selectedDocument.deadline).toLocaleDateString() : 'N/A'}</p>
+                          <p className="text-sm">{formatDate(selectedDocument.deadline, language)}</p>
                       </div>
                       <div className="space-y-1">
                           <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.createdAt')}</p>
-                          <p className="text-sm">{new Date(selectedDocument.createdAt).toLocaleString()}</p>
+                          <p className="text-sm">{formatDateTime(selectedDocument.createdAt, language)}</p>
                       </div>
                        <div className="space-y-1">
                           <p className="text-sm font-medium text-muted-foreground">{t('documentsPage.detailsDialog.department')}</p>
@@ -163,7 +177,13 @@ export default function DocumentsPage() {
 }
 
 function DocumentsTable({ documents, onViewDetails }: { documents: typeof mockDocuments, onViewDetails: (doc: Document) => void }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <Table>
       <TableHeader>
@@ -197,7 +217,7 @@ function DocumentsTable({ documents, onViewDetails }: { documents: typeof mockDo
                 </Avatar>
                 {doc.assignee.name}
             </TableCell>
-            <TableCell>{doc.deadline ? new Date(doc.deadline).toLocaleDateString() : 'N/A'}</TableCell>
+            <TableCell>{isClient ? formatDate(doc.deadline, language) : 'N/A'}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -220,4 +240,5 @@ function DocumentsTable({ documents, onViewDetails }: { documents: typeof mockDo
     </Table>
   );
 }
+
 

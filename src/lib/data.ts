@@ -38,12 +38,12 @@ const documentTitles = [
 
 
 export const mockDocuments: Document[] = Array.from({ length: 25 }, (_, i) => {
-  const date = new Date(2024, 6, 15 - (i % 15));
-  const deadlineDate = new Date(date.getTime() + ((i % 5) * 5 * 24 * 60 * 60 * 1000));
+    const date = new Date(Date.UTC(2024, 6, 15 - (i % 15)));
+    const deadlineDate = new Date(date.getTime() + ((i % 5) * 5 * 24 * 60 * 60 * 1000));
   
   return {
     id: `DOC-${1001 + i}`,
-    title: documentTitles[i % documentTitles.length],
+    title: documentTitles[i],
     category: DOCUMENT_CATEGORIES[i % DOCUMENT_CATEGORIES.length],
     department: DEPARTMENTS[i % DEPARTMENTS.length],
     urgency: URGENCY_LEVELS[i % URGENCY_LEVELS.length] as "low" | "medium" | "high",
