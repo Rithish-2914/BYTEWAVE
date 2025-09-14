@@ -1,0 +1,22 @@
+export type Document = {
+  id: string;
+  title: string;
+  category: string;
+  department: string;
+  urgency: "low" | "medium" | "high";
+  status: "Pending" | "In Review" | "Approved" | "Rejected";
+  createdAt: string;
+  deadline?: string;
+  summary: string;
+  assignee: {
+    name: string;
+    avatarUrl: string;
+  };
+};
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number;
+};
