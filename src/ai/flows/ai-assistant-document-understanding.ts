@@ -12,6 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import wav from 'wav';
+import { translateText } from './translate-text';
 
 const AiAssistantDocumentUnderstandingInputSchema = z.object({
   documentText: z.string().describe('The text content of the document to understand.'),
@@ -59,19 +60,18 @@ export async function aiAssistantDocumentUnderstanding(input: AiAssistantDocumen
 
 const aiAssistantDocumentUnderstandingPrompt = ai.definePrompt({
   name: 'aiAssistantDocumentUnderstandingPrompt',
-  input: {schema: AiAssistantDocumentUnderstandingInputSchema},
-  output: {schema: AiAssistantDocumentUnderstandingOutputSchema},
-  prompt: `You are an AI assistant specializing in understanding documents.  A user has uploaded a document and asked a question about it.  Answer the question using the document content.
+  input: {schema: z.object({
+    documentText: z.string(),
+    query: z.string(),
+  })},
+  output: {schema: z.object({response: z.string()})},
+  prompt: `You are an AI assistant specializing in understanding documents.  A user has uploaded a document and asked a question about it.  Answer the question in English using the document content.
 
 Document Content: {{{documentText}}}
 
 User Query: {{{query}}}
 
-Desired Language: {{{language}}}
-
-Desired Response Type: {{{responseType}}}
-
-Provide a concise and informative answer in the desired language. If the desired response type is audio, provide the text that will be converted to speech.
+Provide a concise and informative answer in English.
 `,
 });
 
@@ -83,11 +83,12 @@ const aiAssistantDocumentUnderstandingFlow = ai.defineFlow(
   },
   async input => {
     let responseText: string;
-    const {output} = await aiAssistantDocumentUnderstandingPrompt(input);
+    const {output} = await aiAssistantDocumentUnderstandingPrompt({documentText: input.documentText, query: input.query});
     responseText = output!.response;
 
     if (input.language === 'ml') {
-      // TODO: Add translation logic here if needed.
+      const translationResponse = await translateText({text: responseText, targetLanguage: 'ml'});
+      responseText = translationResponse.translatedText;
     }
 
     if (input.responseType === 'audio') {
