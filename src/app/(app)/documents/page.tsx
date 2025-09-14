@@ -259,7 +259,7 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
       </TableHeader>
       <TableBody>
         {documents.map((doc) => (
-          <TableRow key={doc.id}>
+          <TableRow key={doc.id} onClick={() => onViewDetails(doc)} className="cursor-pointer">
             <TableCell className="font-medium">{doc.title}</TableCell>
             <TableCell>
               <Badge variant="outline">{t(doc.status)}</Badge>
@@ -280,7 +280,7 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button aria-haspopup="true" size="icon" variant="ghost">
+                  <Button aria-haspopup="true" size="icon" variant="ghost" onClick={(e) => e.stopPropagation()}>
                     <MoreHorizontal className="h-4 w-4" />
                     <span className="sr-only">{t("table.toggleMenu")}</span>
                   </Button>
@@ -300,3 +300,5 @@ function DocumentsTable({ documents, onViewDetails }: { documents: Document[], o
     </Table>
   );
 }
+
+    
