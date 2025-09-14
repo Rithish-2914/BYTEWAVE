@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/providers/language-provider";
 import { aiAssistantDocumentUnderstanding } from "@/ai/flows/ai-assistant-document-understanding";
+import { useDocuments } from "@/hooks/use-documents";
 
 type Message = {
   id: number;
@@ -20,6 +21,8 @@ type Message = {
 
 export default function AiAssistantPage() {
   const { t, language } = useLanguage();
+  const { documents } = useDocuments();
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -55,8 +58,8 @@ export default function AiAssistantPage() {
     setIsBotTyping(true);
 
     try {
-      // This is a placeholder for a real document context
-      const documentText = "The quick brown fox jumps over the lazy dog. The main action item is to review safety protocols.";
+      // Create a single context string from all documents
+      const documentText = documents.map(doc => `Document Title: ${doc.title}\nSummary: ${doc.summary}`).join('\n\n---\n\n');
 
       const result = await aiAssistantDocumentUnderstanding({
         documentText,
