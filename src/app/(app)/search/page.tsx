@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -85,12 +86,12 @@ export default function SearchPage() {
               {searchResults.map((doc) => (
                 <Card key={doc.id}>
                   <CardHeader>
-                    <CardTitle className="text-lg">{doc.title}</CardTitle>
-                    <CardDescription>
-                      <Badge variant={getUrgencyBadgeVariant(doc.urgency)}>
-                        {t(doc.urgency)}
-                      </Badge>
-                    </CardDescription>
+                    <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{doc.title}</CardTitle>
+                        <Badge variant={getUrgencyBadgeVariant(doc.urgency)}>
+                            {t(doc.urgency)}
+                        </Badge>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground line-clamp-3">
