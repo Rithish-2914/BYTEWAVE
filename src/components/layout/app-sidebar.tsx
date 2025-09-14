@@ -14,7 +14,6 @@ import {
   UploadCloud,
   Users,
   Bell,
-  Waves,
 } from "lucide-react";
 
 import {
@@ -30,6 +29,7 @@ import {
 import type { NavItem } from "@/lib/types";
 import { useLanguage } from "@/components/providers/language-provider";
 import { useAuth } from "@/components/providers/auth-provider";
+import { Logo } from "./logo";
 
 
 const allNavItems: Omit<NavItem, 'label'> & {i18nKey: string, roles?: string[]}[] = [
@@ -62,7 +62,7 @@ export function AppSidebar() {
           href="/dashboard"
           className="flex items-center gap-2 font-headline font-bold text-lg text-sidebar-foreground transition-colors hover:text-sidebar-accent-foreground"
         >
-          <Waves className="h-7 w-7 text-primary" />
+          <Logo className="h-7 w-7 text-primary" />
           <span className={state === "collapsed" ? "hidden" : "inline"}>ByteWave</span>
         </Link>
       </SidebarHeader>
