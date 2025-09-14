@@ -35,6 +35,8 @@ import { DEPARTMENTS, URGENCY_LEVELS } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "../providers/language-provider";
+import { mockDocuments } from "@/lib/data";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -55,6 +57,7 @@ type UploadFormProps = {
 export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -69,11 +72,30 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     console.log("Form Submitted", data);
+
+    const newDocument = {
+        id: `DOC-${Date.now()}`,
+        title: data.title,
+        summary: data.summary,
+        department: data.department,
+        urgency: data.urgency,
+        deadline: data.deadline?.toISOString().split('T')[0],
+        category: 'Uncategorized',
+        status: 'Pending' as const,
+        createdAt: new Date().toISOString(),
+        assignee: {
+            name: "Admin",
+            avatarUrl: "https://picsum.photos/seed/user-admin/100/100"
+        }
+    };
+
+    mockDocuments.unshift(newDocument);
+
     toast({
       title: t("uploadForm.reviewAndAssign"),
       description: `"${data.title}" has been assigned to ${data.department}.`,
     });
-    onReset(); // Go back to upload screen
+    router.push('/documents');
   };
 
   return (

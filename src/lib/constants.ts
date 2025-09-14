@@ -19,6 +19,7 @@ export const DOCUMENT_CATEGORIES = [
   "Legal & Governance",
   "Environment & CSR",
   "External Communication",
+  "Uncategorized",
 ];
 
 export const URGENCY_LEVELS = ["low", "medium", "high"];
