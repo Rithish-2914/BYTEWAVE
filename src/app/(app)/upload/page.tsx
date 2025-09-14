@@ -50,11 +50,11 @@ export default function UploadPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("file");
 
 
   useEffect(() => {
     const getCameraPermission = async () => {
-      if (hasCameraPermission === null) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
           setHasCameraPermission(true);
@@ -71,19 +71,27 @@ export default function UploadPage() {
             description: 'Please enable camera permissions in your browser settings to use this app.',
           });
         }
-      }
     };
-  
-    getCameraPermission();
 
-    return () => {
+    const stopCamera = () => {
         if(videoRef.current && videoRef.current.srcObject) {
             const stream = videoRef.current.srcObject as MediaStream;
             stream.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
         }
     }
+    
+    if (activeTab === 'camera') {
+        getCameraPermission();
+    } else {
+        stopCamera();
+    }
 
-  }, [hasCameraPermission, toast]);
+    return () => {
+        stopCamera();
+    }
+
+  }, [activeTab, toast]);
 
   const handleFileChange = async (selectedFile: File | null) => {
     if (!selectedFile) return;
@@ -109,7 +117,7 @@ export default function UploadPage() {
 
       const [summaryResult, assignmentResult] = await Promise.all([
         summarizeUploadedDocument({ documentDataUri }),
-        assignDepartmentAndUrgency({ documentContent }),
+        documentContent ? assignDepartmentAndUrgency({ documentContent }) : Promise.resolve({}),
       ]);
 
       setAiData({
@@ -206,7 +214,7 @@ export default function UploadPage() {
         </p>
       </div>
 
-       <Tabs defaultValue="file" className="w-full max-w-2xl mx-auto">
+       <Tabs defaultValue="file" value={activeTab} onValueChange={setActiveTab} className="w-full max-w-2xl mx-auto">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="file">
             <FileUp className="mr-2 h-4 w-4" />
@@ -255,7 +263,7 @@ export default function UploadPage() {
                     )}
                </div>
                <canvas ref={canvasRef} className="hidden"></canvas>
-               <Button onClick={handleCapture} disabled={!hasCameraPermission || isProcessing}>
+               <Button onClick={handleCapture} disabled={hasCameraPermission === false || isProcessing}>
                     <Camera className="mr-2 h-4 w-4" />
                     {t('uploadPage.capture')}
                </Button>
@@ -265,3 +273,4 @@ export default function UploadPage() {
     </div>
   );
 }
+
