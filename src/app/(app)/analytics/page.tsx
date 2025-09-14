@@ -1,15 +1,19 @@
+"use client";
+
 import { CategoryChart } from "@/components/dashboard/category-chart";
 import { StatusChart } from "@/components/dashboard/status-chart";
+import { useLanguage } from "@/components/providers/language-provider";
 
 export default function AnalyticsPage() {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="font-headline text-3xl font-bold tracking-tight">
-          Analytics
+          {t("Analytics")}
         </h1>
         <p className="text-muted-foreground">
-          In-depth analysis of document workflows and trends.
+          {t("analyticsPage.description")}
         </p>
       </div>
 

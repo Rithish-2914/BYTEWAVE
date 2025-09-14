@@ -1,17 +1,22 @@
+"use client";
+
+import { useLanguage } from "@/components/providers/language-provider";
+
 export default function ArchivePage() {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="font-headline text-3xl font-bold tracking-tight">
-          Archive
+          {t("Archive")}
         </h1>
         <p className="text-muted-foreground">
-          Browse and restore archived documents.
+          {t("archivePage.description")}
         </p>
       </div>
       {/* Placeholder content for archive */}
       <div className="text-center py-20 text-muted-foreground">
-        Archived documents will appear here.
+        {t("archivePage.placeholder")}
       </div>
     </div>
   );

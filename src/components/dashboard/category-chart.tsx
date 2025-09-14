@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/chart";
 import { mockDocuments } from "@/lib/data";
 import { DOCUMENT_CATEGORIES } from "@/lib/constants";
+import { useLanguage } from "../providers/language-provider";
 
 const chartData = DOCUMENT_CATEGORIES.map((category) => ({
   name: category,
@@ -40,12 +41,13 @@ const COLORS = [
 ];
 
 export function CategoryChart() {
+  const { t } = useLanguage();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Documents by Category</CardTitle>
+        <CardTitle>{t("categoryChart.title")}</CardTitle>
         <CardDescription>
-          Distribution of all documents across different categories.
+          {t("categoryChart.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

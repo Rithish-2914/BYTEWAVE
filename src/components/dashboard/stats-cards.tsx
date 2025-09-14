@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -6,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { mockDocuments } from "@/lib/data";
 import { FileText, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { useLanguage } from "../providers/language-provider";
 
 type StatCardProps = {
   title: string;
@@ -30,6 +33,7 @@ function StatCard({ title, value, icon: Icon, description }: StatCardProps) {
 }
 
 export function StatsCards() {
+  const { t } = useLanguage();
   const totalDocuments = mockDocuments.length;
   const pendingReview = mockDocuments.filter(
     (doc) => doc.status === "Pending" || doc.status === "In Review"
@@ -44,28 +48,28 @@ export function StatsCards() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        title="Total Documents"
+        title={t("statsCards.totalDocuments")}
         value={totalDocuments.toString()}
         icon={FileText}
-        description="+20.1% from last month"
+        description={t("statsCards.totalDocumentsDescription")}
       />
       <StatCard
-        title="Pending Review"
+        title={t("statsCards.pendingReview")}
         value={pendingReview.toString()}
         icon={Clock}
-        description="Awaiting department action"
+        description={t("statsCards.pendingReviewDescription")}
       />
       <StatCard
-        title="Resolved"
+        title={t("statsCards.resolved")}
         value={resolved.toString()}
         icon={CheckCircle}
-        description="Documents approved and closed"
+        description={t("statsCards.resolvedDescription")}
       />
       <StatCard
-        title="Overdue"
+        title={t("statsCards.overdue")}
         value={overdue.toString()}
         icon={AlertTriangle}
-        description="Past deadline, require attention"
+        description={t("statsCards.overdueDescription")}
       />
     </div>
   );

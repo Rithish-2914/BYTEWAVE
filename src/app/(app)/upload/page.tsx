@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { UploadForm } from "@/components/upload/upload-form";
+import { useLanguage } from "@/components/providers/language-provider";
 
 // Mock AI functions
 const summarizeUploadedDocument = async (file: File) => {
@@ -27,6 +28,7 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiData, setAiData] = useState<any>(null);
+  const { t } = useLanguage();
 
   const handleFileChange = async (selectedFile: File | null) => {
     if (!selectedFile) return;
@@ -75,10 +77,10 @@ export default function UploadPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="font-headline text-3xl font-bold tracking-tight">
-          Upload Document
+          {t("uploadPage.title")}
         </h1>
         <p className="text-muted-foreground">
-          Upload a new document to be processed and assigned by the AI.
+          {t("uploadPage.description")}
         </p>
       </div>
 
@@ -93,9 +95,9 @@ export default function UploadPage() {
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <FileUp className="w-10 h-10 mb-3 text-muted-foreground" />
                 <p className="mb-2 text-sm text-muted-foreground">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
+                  <span className="font-semibold">{t("uploadPage.clickToUpload")}</span> {t("uploadPage.dragAndDrop")}
                 </p>
-                <p className="text-xs text-muted-foreground">PDF, DOCX, XLSX, PNG, JPG</p>
+                <p className="text-xs text-muted-foreground">{t("uploadPage.fileTypes")}</p>
               </div>
               <input id="dropzone-file" type="file" className="hidden" onChange={onFileInputChange} />
             </label>
@@ -105,8 +107,8 @@ export default function UploadPage() {
         {isProcessing && (
             <div className="flex flex-col items-center justify-center gap-4 text-center">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <h2 className="font-headline text-xl">Processing <span className="font-mono text-primary">{file?.name}</span>...</h2>
-                <p className="text-muted-foreground">The AI is summarizing and categorizing your document.</p>
+                <h2 className="font-headline text-xl">{t("uploadPage.processing")} <span className="font-mono text-primary">{file?.name}</span>...</h2>
+                <p className="text-muted-foreground">{t("uploadPage.processingDescription")}</p>
             </div>
         )}
 

@@ -12,8 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreditCard, LogOut, Settings, User } from "lucide-react";
+import { useLanguage } from "../providers/language-provider";
 
 export function UserNav() {
+  const { t } = useLanguage();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -37,17 +39,17 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <User />
-            Profile
+            {t("userNav.profile")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings />
-            Settings
+            {t("userNav.settings")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <LogOut />
-          Log out
+          {t("userNav.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

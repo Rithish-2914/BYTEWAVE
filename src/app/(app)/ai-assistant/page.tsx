@@ -19,10 +19,11 @@ type Message = {
 };
 
 export default function AiAssistantPage() {
+  const { t, language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! How can I help you with your documents today? Ask in English or Malayalam.",
+      text: t("aiAssistantPage.initialMessage"),
       sender: "bot",
     },
   ]);
@@ -30,7 +31,6 @@ export default function AiAssistantPage() {
   const [isBotTyping, setIsBotTyping] = useState(false);
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { language, setLanguage } = useLanguage();
   const [responseType, setResponseType] = useState<'text' | 'audio'>('text');
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function AiAssistantPage() {
 
       const botResponse: Message = {
         id: Date.now() + 1,
-        text: responseType === 'text' ? result.response : 'Audio response generated.',
+        text: responseType === 'text' ? result.response : t("aiAssistantPage.audioResponseMessage"),
         sender: "bot",
         audio: responseType === 'audio' ? result.response : undefined
       };
@@ -77,12 +77,12 @@ export default function AiAssistantPage() {
        console.error("Error calling AI assistant:", error);
        toast({
          variant: "destructive",
-         title: "Error",
-         description: "Failed to get a response from the AI assistant.",
+         title: t("aiAssistantPage.errorTitle"),
+         description: t("aiAssistantPage.errorDescription"),
        });
        const botResponse: Message = {
         id: Date.now() + 1,
-        text: "Sorry, I encountered an error. Please try again.",
+        text: t("aiAssistantPage.errorResponse"),
         sender: "bot",
       };
       setMessages((prev) => [...prev, botResponse]);
@@ -100,8 +100,8 @@ export default function AiAssistantPage() {
       console.error("Error playing audio:", error);
       toast({
         variant: "destructive",
-        title: "Audio Error",
-        description: "Could not play the generated audio.",
+        title: t("aiAssistantPage.audioErrorTitle"),
+        description: t("aiAssistantPage.audioErrorDescription"),
       });
     }
   };
@@ -110,10 +110,10 @@ export default function AiAssistantPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="mb-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight">
-          AI Assistant
+          {t("AI Assistant")}
         </h1>
         <p className="text-muted-foreground">
-          Ask questions about your documents in English or Malayalam.
+          {t("aiAssistantPage.description")}
         </p>
       </div>
 
@@ -177,7 +177,7 @@ export default function AiAssistantPage() {
                 variant={responseType === 'text' ? 'secondary': 'ghost'} 
                 size="icon" 
                 onClick={() => setResponseType('text')}
-                aria-label="Text response"
+                aria-label={t('aiAssistantPage.textResponseAriaLabel')}
               >
                 T
               </Button>
@@ -185,7 +185,7 @@ export default function AiAssistantPage() {
                 variant={responseType === 'audio' ? 'secondary': 'ghost'} 
                 size="icon" 
                 onClick={() => setResponseType('audio')}
-                aria-label="Audio response"
+                aria-label={t('aiAssistantPage.audioResponseAriaLabel')}
               >
                 <Volume2 className="h-4 w-4" />
               </Button>
@@ -195,7 +195,7 @@ export default function AiAssistantPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask about a document..."
+              placeholder={t("aiAssistantPage.inputPlaceholder")}
               className="pr-20"
             />
             <div className="absolute inset-y-0 right-0 flex items-center">

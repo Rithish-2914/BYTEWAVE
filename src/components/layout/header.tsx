@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,8 +7,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "./theme-toggle";
 import { UserNav } from "./user-nav";
 import { LanguageToggle } from "./language-toggle";
+import { useLanguage } from "../providers/language-provider";
 
 export function Header() {
+  const { t } = useLanguage();
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
       <div className="lg:hidden">
@@ -18,7 +22,7 @@ export function Header() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search documents..."
+              placeholder={t("header.searchPlaceholder")}
               className="w-full appearance-none bg-background pl-9 md:w-2/3 lg:w-1/3"
             />
           </div>
@@ -31,7 +35,7 @@ export function Header() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-accent/80"></span>
           </span>
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">{t("header.notifications")}</span>
         </Button>
         <LanguageToggle />
         <ThemeToggle />

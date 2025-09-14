@@ -33,6 +33,7 @@ import { format } from "date-fns";
 import { DEPARTMENTS, URGENCY_LEVELS } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "../providers/language-provider";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -51,6 +52,8 @@ type UploadFormProps = {
 
 export function UploadForm({ fileName, aiData }: UploadFormProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -65,7 +68,7 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     console.log("Form Submitted", data);
     toast({
-      title: "Document Processed",
+      title: t("uploadForm.reviewAndAssign"),
       description: `"${data.title}" has been assigned to ${data.department}.`,
     });
   };
@@ -73,7 +76,7 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Review & Assign Document</CardTitle>
+        <CardTitle>{t("uploadForm.reviewAndAssign")}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -83,9 +86,9 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Document Title</FormLabel>
+                  <FormLabel>{t("uploadForm.documentTitle")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Q2 Maintenance Report" {...field} />
+                    <Input placeholder={t("uploadForm.documentTitlePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,9 +100,9 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
               name="summary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>AI-Generated Summary</FormLabel>
+                  <FormLabel>{t("uploadForm.summary")}</FormLabel>
                   <FormControl>
-                    <Textarea rows={5} placeholder="AI summary will appear here..." {...field} />
+                    <Textarea rows={5} placeholder={t("uploadForm.summaryPlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,11 +115,11 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
                 name="department"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Assign Department</FormLabel>
+                    <FormLabel>{t("uploadForm.assignDepartment")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select a department" />
+                            <SelectValue placeholder={t("uploadForm.selectDepartment")} />
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -137,17 +140,17 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
                 name="urgency"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Set Urgency</FormLabel>
+                    <FormLabel>{t("uploadForm.setUrgency")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select urgency level" />
+                            <SelectValue placeholder={t("uploadForm.selectUrgency")} />
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                         {URGENCY_LEVELS.map((level) => (
                             <SelectItem key={level} value={level} className="capitalize">
-                            {level}
+                            {t(level)}
                             </SelectItem>
                         ))}
                         </SelectContent>
@@ -163,7 +166,7 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
               name="deadline"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Deadline (Optional)</FormLabel>
+                  <FormLabel>{t("uploadForm.deadline")}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -177,7 +180,7 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
-                            <span>Pick a date</span>
+                            <span>{t("uploadForm.pickDate")}</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -198,8 +201,8 @@ export function UploadForm({ fileName, aiData }: UploadFormProps) {
             />
             
             <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline">Reset</Button>
-                <Button type="submit">Confirm & Notify</Button>
+                <Button type="button" variant="outline">{t("uploadForm.reset")}</Button>
+                <Button type="submit">{t("uploadForm.confirmAndNotify")}</Button>
             </div>
           </form>
         </Form>

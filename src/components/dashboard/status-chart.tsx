@@ -15,26 +15,29 @@ import {
 } from "@/components/ui/chart";
 import { mockDocuments } from "@/lib/data";
 import { DOCUMENT_STATUSES } from "@/lib/constants";
-
-const chartData = DOCUMENT_STATUSES.map((status) => ({
-  name: status,
-  total: mockDocuments.filter((doc) => doc.status === status).length,
-}));
-
-const chartConfig = {
-  total: {
-    label: "Total",
-    color: "hsl(var(--primary))",
-  },
-};
+import { useLanguage } from "../providers/language-provider";
 
 export function StatusChart() {
+  const { t } = useLanguage();
+
+  const chartData = DOCUMENT_STATUSES.map((status) => ({
+    name: t(status),
+    total: mockDocuments.filter((doc) => doc.status === status).length,
+  }));
+
+  const chartConfig = {
+    total: {
+      label: t("Total"),
+      color: "hsl(var(--primary))",
+    },
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Document Workflow Status</CardTitle>
+        <CardTitle>{t("statusChart.title")}</CardTitle>
         <CardDescription>
-          Current status of documents in the workflow pipeline.
+          {t("statusChart.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
