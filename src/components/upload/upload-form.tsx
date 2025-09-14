@@ -100,7 +100,7 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
 
     toast({
       title: t("uploadForm.reviewAndAssign"),
-      description: `"${data.title}" has been assigned to ${data.department}.`,
+      description: `"${data.title}" has been assigned. The ${data.department} department head has been notified.`,
     });
     router.push('/documents');
   };
