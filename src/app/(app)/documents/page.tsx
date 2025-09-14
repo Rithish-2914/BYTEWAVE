@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { mockDocuments } from "@/lib/data";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +39,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { useDocuments } from "@/hooks/use-documents";
 
 function getUrgencyBadgeVariant(urgency: "low" | "medium" | "high") {
   switch (urgency) {
@@ -68,6 +68,7 @@ const formatDateTime = (dateString: string | undefined, locale: string) => {
 
 export default function DocumentsPage() {
   const { t, language } = useLanguage();
+  const { documents } = useDocuments();
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   const handleViewDetails = (doc: Document) => {
@@ -105,11 +106,11 @@ export default function DocumentsPage() {
             ))}
         </TabsList>
         <TabsContent value="All">
-            <DocumentsTable documents={mockDocuments} onViewDetails={handleViewDetails} />
+            <DocumentsTable documents={documents} onViewDetails={handleViewDetails} />
         </TabsContent>
         {DOCUMENT_STATUSES.map(status => (
             <TabsContent key={status} value={status}>
-                <DocumentsTable documents={mockDocuments.filter(d => d.status === status)} onViewDetails={handleViewDetails} />
+                <DocumentsTable documents={documents.filter(d => d.status === status)} onViewDetails={handleViewDetails} />
             </TabsContent>
         ))}
       </Tabs>
@@ -179,7 +180,7 @@ export default function DocumentsPage() {
   );
 }
 
-function DocumentsTable({ documents, onViewDetails }: { documents: typeof mockDocuments, onViewDetails: (doc: Document) => void }) {
+function DocumentsTable({ documents, onViewDetails }: { documents: Document[], onViewDetails: (doc: Document) => void }) {
   const { t, language } = useLanguage();
   const [isClient, setIsClient] = useState(false);
 

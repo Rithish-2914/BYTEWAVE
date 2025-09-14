@@ -35,7 +35,7 @@ import { DEPARTMENTS, URGENCY_LEVELS } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "../providers/language-provider";
-import { mockDocuments } from "@/lib/data";
+import { useDocuments } from "@/hooks/use-documents";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
@@ -58,6 +58,7 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
   const router = useRouter();
+  const { addDocument } = useDocuments();
 
   const getValidDate = (date: any) => {
     if (!date) return undefined;
@@ -95,7 +96,7 @@ export function UploadForm({ fileName, aiData, onReset }: UploadFormProps) {
         }
     };
 
-    mockDocuments.unshift(newDocument);
+    addDocument(newDocument);
 
     toast({
       title: t("uploadForm.reviewAndAssign"),

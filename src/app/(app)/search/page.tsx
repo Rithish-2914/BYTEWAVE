@@ -4,7 +4,6 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { mockDocuments } from "@/lib/data";
 import type { Document } from "@/lib/types";
 import {
   Card,
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useDocuments } from "@/hooks/use-documents";
 
 const formatDate = (dateString: string | undefined, locale: string) => {
     if (!dateString) return 'N/A';
@@ -43,6 +43,7 @@ const formatDateTime = (dateString: string | undefined, locale: string) => {
 
 export default function SearchPage() {
   const { t, language } = useLanguage();
+  const { documents } = useDocuments();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Document[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -56,7 +57,7 @@ export default function SearchPage() {
     }
 
     const lowercasedQuery = searchQuery.toLowerCase();
-    const results = mockDocuments.filter(
+    const results = documents.filter(
       (doc) =>
         doc.title.toLowerCase().includes(lowercasedQuery) ||
         doc.summary.toLowerCase().includes(lowercasedQuery) ||
