@@ -30,16 +30,27 @@ const assignDepartmentAndUrgencyPrompt = ai.definePrompt({
   name: 'assignDepartmentAndUrgencyPrompt',
   input: {schema: AssignDepartmentAndUrgencyInputSchema},
   output: {schema: AssignDepartmentAndUrgencyOutputSchema},
-  prompt: `You are an AI assistant tasked with analyzing document content and assigning a department and urgency level.
+  prompt: `You are an AI assistant for a metro rail company, tasked with routing documents.
 
   Analyze the following document content:
   {{documentContent}}
 
-  Based on the content, determine the most appropriate department to route the document to.
-  Also, determine the urgency level of the document (low, medium, or high).
-  If a specific deadline is mentioned or can be inferred from the document, provide it in ISO format (YYYY-MM-DD).
+  Based on the content, determine the single most appropriate department from the list below to handle this document. For example, a document about "procurement" should go to "Finance & Accounts", and a "blueprint" should go to "Engineering & Projects".
 
-  Departments: Operations, Engineering & Projects, Finance & Accounts, Human Resources (HR) & Administration, Legal Department, Safety & Security, Environment & Social Responsibility, Executive / Board, IT / Systems
+  Also, determine the urgency level of the document (low, medium, or high).
+  If a specific deadline is mentioned or can be inferred, provide it in ISO format (YYYY-MM-DD).
+
+  Available Departments:
+  - Operations
+  - Engineering & Projects
+  - Finance & Accounts
+  - Human Resources (HR) & Administration
+  - Legal Department
+  - Safety & Security
+  - Environment & Social Responsibility
+  - Executive / Board
+  - IT / Systems
+
   Urgency Levels: low, medium, high`,
 });
 
